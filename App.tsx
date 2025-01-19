@@ -1,20 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Text, SafeAreaView } from "react-native";
+import React, { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ApplicationProvider, Layout } from "@ui-kitten/components";
+import * as eva from "@eva-design/eva";
+import { NavigationContainer } from "@react-navigation/native";
+import AppNavigator from "./src/navigation/AppNavigator";
+import { configureGoogleSignIn } from "./src/utils/authHelpers";
 
-export default function App() {
+const App = () => {
+  useEffect(() => {
+     configureGoogleSignIn();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <ApplicationProvider {...eva} theme={eva.light}>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </ApplicationProvider>
+    </SafeAreaProvider>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;

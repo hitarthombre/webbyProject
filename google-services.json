@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "124701486426",
+    "project_id": "webby-1aa55",
+    "storage_bucket": "webby-1aa55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124701486426:android:fe170b1be5f4b4cbd65763",
+        "android_client_info": {
+          "package_name": "com.weber_polytut.webby"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124701486426-jnmhv4vqhaprupon4rg3a4bv71r4kea5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.weber_polytut.webby",
+            "certificate_hash": "38cbf2fa34af2c7fc1929c4eb7a5ec2286c95eb3"
+          }
+        },
+        {
+          "client_id": "124701486426-6mskub3p65nb3cbm3tblbltuuga27lrv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQxGS1hMilYEjHAv9uAkXoiR2lgDVLCsg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124701486426-6mskub3p65nb3cbm3tblbltuuga27lrv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
