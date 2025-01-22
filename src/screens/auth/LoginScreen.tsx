@@ -9,6 +9,7 @@ import {
   validateEmail,
   validatePass,
 } from "../../utils/authHelpers";
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import axios from "axios";
 import userStore from "../../zustand/userStore";
 import API_BASE_URL from "../../../config";
@@ -16,8 +17,9 @@ const LoginScreen = ({ navigation }: any) => {
   const { setUser, getUser } = userStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [isInProgress, setIsInProgress] = useState(false);
   const handleGoogleSignIn = async () => {
+    setIsInProgress(true);
     try {
       const userInfo = await signUpWithGoogle();
       if (userInfo.type === "success") {
@@ -37,6 +39,7 @@ const LoginScreen = ({ navigation }: any) => {
         if (response.data.status === false) {
           Alert.alert(response.data.message);
           signOutFromGoogle();
+          setIsInProgress(false);
           return;
         } else {
           if (response.status === 201) {
@@ -53,13 +56,17 @@ const LoginScreen = ({ navigation }: any) => {
       console.error("Google Sign-In Error:", error);
       Alert.alert("Sign-In Failed", "Please try again.");
       signOutFromGoogle();
+    } finally {
+      setIsInProgress(false);
     }
   };
 
   const handleLogin = async () => {
+    setIsInProgress(true);
     if (!validateEmail(email) || !validatePass(password)) {
       Alert.alert("Invalid email or password");
       setPassword("");
+      setIsInProgress(false);
       return;
     } else {
       // continue login process
@@ -74,7 +81,7 @@ const LoginScreen = ({ navigation }: any) => {
             },
           }
         );
-        console.log(password,"res:"+response)
+        console.log(password, "res:" + response);
         if (response.data.status === false) {
           Alert.alert("Invalid email or password");
           setPassword("");
@@ -90,12 +97,14 @@ const LoginScreen = ({ navigation }: any) => {
             ? error.message
             : "Login failed. Please try again."
         );
-      }
+      }finally {
+        setIsInProgress(false);
     }
+  }
   };
 
   return (
-    <View style={tw`flex-1 justify-center p-4`}>
+    <View style={tw`flex-1 justify-center p-4 items-center`}>
       <Image
         source={require("../../../assets/images/auth_icon.png")}
         style={tw`w-full h-30 mb-8`}
@@ -106,7 +115,7 @@ const LoginScreen = ({ navigation }: any) => {
         keyboardType="email-address"
         placeholder="Email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={setEmail} 
         style={tw`mb-4 ml-6 mr-6`}
         textStyle={tw`p-2`}
       />
@@ -118,12 +127,15 @@ const LoginScreen = ({ navigation }: any) => {
         style={tw`mb-4 ml-6 mr-6`}
         textStyle={tw`p-2`}
       />
-      <Button
-        onPress={handleLogin}
-        style={[tw`mb-4 ml-6 mr-6`, { backgroundColor: colors.primary }]}
-      >
-        Login
-      </Button>
+      <View style={tw`w-full`}>
+        <Button
+          onPress={handleLogin}
+          style={[tw`mb-4 ml-6 mr-6`, { backgroundColor: colors.primary }]}
+          disabled={isInProgress}
+        >
+          Login
+        </Button>
+      </View>
       <Button
         appearance="ghost"
         onPress={() => navigation.navigate("Register")}
@@ -131,7 +143,7 @@ const LoginScreen = ({ navigation }: any) => {
         Don't have an account? Register
       </Button>
       {/* google login */}
-      <Pressable
+      {/* <Pressable
         style={tw`flex-row justify-center items-center mt-4`}
         onPress={handleGoogleSignIn}
       >
@@ -141,7 +153,16 @@ const LoginScreen = ({ navigation }: any) => {
             style={tw`w-full h-full`}
           ></Image>
         </View>
-      </Pressable>
+      </Pressable> */}
+
+      <GoogleSigninButton
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={() => {
+          handleGoogleSignIn();
+        }}
+        disabled={isInProgress}
+      />
     </View>
   );
 };
