@@ -6,10 +6,11 @@ import * as eva from "@eva-design/eva";
 import { NavigationContainer } from "@react-navigation/native";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { configureGoogleSignIn } from "./src/utils/authHelpers";
+import HomeScreen from "./src/screens/restaurant/HomeScreen";
 
 const App = () => {
   useEffect(() => {
-     configureGoogleSignIn();
+    configureGoogleSignIn();
   }, []);
 
   return (

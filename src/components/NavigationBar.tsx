@@ -116,7 +116,7 @@ const NavigationBar = ({navigation}:any) => {
         </TouchableOpacity>
 
         {/* =============== Search Tab =============== */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.tabButton}
           onPress={() => handleItemPress("Search")}>
           <Ionicons
@@ -147,7 +147,7 @@ const NavigationBar = ({navigation}:any) => {
             ]}>
             Search
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* =============== Profile Tab =============== */}
         <TouchableOpacity
@@ -238,12 +238,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
+    paddingVertical:10,
+    paddingHorizontal:15,
+    marginBottom:10
   },
   tabButton: {
     alignItems: "center",
+    
   },
   tabText: {
     fontSize: 12,
-    marginTop: 5,
+    margin: 3,
   },
 });
