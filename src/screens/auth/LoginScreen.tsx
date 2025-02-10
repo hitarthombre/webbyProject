@@ -8,6 +8,8 @@ import {
   signUpWithGoogle,
   validateEmail,
   validatePass,
+  hasPreviousSignIn,
+  getCurrentUser,
 } from "../../utils/authHelpers";
 import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import axios from "axios";
@@ -18,8 +20,15 @@ const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isInProgress, setIsInProgress] = useState(false);
+  // google sign-in
   const handleGoogleSignIn = async () => {
     setIsInProgress(true);
+    // const currentUser = await hasPreviousSignIn();
+    // if (currentUser) {
+    //   const loggedInUser = {'email' : currentUser.user.email, 'idToken' : currentUser.user.id, 'name' : currentUser.user.name, 'photoUrl' : currentUser.user.photo};
+    //   setUser(loggedInUser);
+    // }
+
     try {
       const userInfo = await signUpWithGoogle();
       if (userInfo.type === "success") {
@@ -97,10 +106,10 @@ const LoginScreen = ({ navigation }: any) => {
             ? error.message
             : "Login failed. Please try again."
         );
-      }finally {
+      } finally {
         setIsInProgress(false);
+      }
     }
-  }
   };
 
   return (
@@ -115,7 +124,7 @@ const LoginScreen = ({ navigation }: any) => {
         keyboardType="email-address"
         placeholder="Email"
         value={email}
-        onChangeText={setEmail} 
+        onChangeText={setEmail}
         style={tw`mb-4 ml-6 mr-6`}
         textStyle={tw`p-2`}
       />

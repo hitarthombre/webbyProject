@@ -21,8 +21,8 @@ const ProfileButtonBar = () => {
     setTheme(systemTheme);
   }, [systemTheme]);
 
-  const isDarkMode = theme === "dark";
-
+  // const isDarkMode = theme === "dark";
+const isDarkMode = false
   // const router = useRouter();
 
   const goSettings = () => {

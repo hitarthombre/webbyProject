@@ -2,23 +2,20 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./types";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
-// import HomeScreen from "../screens/HomeScreen";
-// import Home from "../screens/restaurant/Home";
 import RestaurantPage from "../screens/restaurant/Restaurant";
 import RegisterRestaurantScreen from "../screens/restaurant/RegisterRestaurantScreen";
-import RestaurantFormScreen from "../screens/RestaurantFormScreen";
-import { Text } from "react-native";
 import Search from "../screens/Search/Search";
 import Profile from "../screens/Profile/Profile";
 import Product from "../screens/Product/Product";
 import HomeScreen from "../screens/restaurant/HomeScreen";
+import MenuItemsScreen from "../screens/restaurant/menuItemsScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName="RegisterRestaurant"
       screenOptions={{
         headerShown: true,
         headerBackTitle: "Back",
@@ -32,6 +29,11 @@ const AppNavigator = () => {
       <Stack.Screen
         name="Register"
         component={RegisterScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MenuItems"
+        component={MenuItemsScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

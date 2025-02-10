@@ -64,3 +64,22 @@ export const  validateOtp = (otp:string)=> {
   const regex = /^\d{6}$/;
   return regex.test(otp);
   }
+
+  export const hasPreviousSignIn = async () => {
+    try {
+      const currentUser = await GoogleSignin.getCurrentUser();// Avoid variable name conflicts
+      if (currentUser) {
+        return currentUser;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error checking previous sign-in:", error);
+      return null; // Handle errors gracefully
+    }
+  };
+
+  export const getCurrentUser = async () => {
+    const currentUser = GoogleSignin.getCurrentUser();
+    return  currentUser ;
+  };

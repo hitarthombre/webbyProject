@@ -23,7 +23,8 @@ const ProfileTopBar = () => {
     setTheme(systemTheme);
   }, [systemTheme]);
 
-  const isDarkMode = theme === "dark";
+  // const isDarkMode = theme === "dark";
+  const isDarkMode = false
   const textColor = isDarkMode ? "#FFF" : "#000";
   const backgroundColor = isDarkMode ? "#333" : "#FFF";
   const redColor = isDarkMode ? "#FF6347" : "red";

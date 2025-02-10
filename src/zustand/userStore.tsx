@@ -3,8 +3,8 @@ import { create } from "zustand";
 interface User {
   email: string;
   idToken: string;
-  name: string;
-  photoUrl: string;
+  name?: string;
+  photoUrl?: string;
 }
 
 interface UserState {

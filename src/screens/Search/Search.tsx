@@ -1,34 +1,86 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import React from "react";
-import SearchRestro from "../Search/SearchRestro";
-import NavigationBar from "../../components/NavigationBar";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import SearchModal from "./SearchModal"; // Import the new SearchModal component
+import API_BASE_URL from "../../../config";
 
-const screenWidth = Dimensions.get("window").width;
-const screenHeight = Dimensions.get("window").height;
-const Search = ({navigation}:any) => {
+const Search = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  // Fetch search suggestions
+  useEffect(() => {
+    if (searchText.trim().length === 0) {
+      setSuggestions([]);
+      return;
+    }
+    fetch(`${API_BASE_URL}/api/restaurants/search?term=${searchText}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setSuggestions(data.results || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching search results aha:", error);
+      });
+  }, [searchText]);
+
+  const handleSuggestionPress = (item:any) => {
+    console.log("Selected:", item); // Replace with navigation logic
+  };
+
   return (
-    <View>
-      <View style={styles.SearchContainer}>
-        <SearchRestro />
-      </View>
-      <View style={styles.navigation}>
-      <NavigationBar navigation={navigation} />
-      </View>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        {/* Button to open search modal */}
+        <TouchableOpacity
+          style={styles.searchContainer}
+          onPress={() => setModalVisible(true)}>
+          {/* <Ionicons name="search" size={24} color="#666" /> */}
+          <Text style={styles.searchPlaceholder}>Search ...</Text>
+        </TouchableOpacity>
+
+        {/* Other components like categories, promotions, etc., go here */}
+      </ScrollView>
+
+      {/* Search Modal */}
+      <SearchModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        suggestions={suggestions}
+        onSuggestionPress={handleSuggestionPress}
+      />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  navigation: {
-    height: screenHeight * 0.08,
-    backgroundColor: "#000",
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
   },
-  SearchContainer: {
-    height: screenHeight * 0.93,
-    width: screenWidth,
-    backgroundColor: "white",
-    justifyContent: "center",
+  searchContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#eee",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    margin: 16,
+    height: 40,
+  },
+  searchPlaceholder: {
+    color: "#666",
+    marginLeft: 8,
+    fontSize: 16,
   },
 });
 

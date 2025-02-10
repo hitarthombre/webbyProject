@@ -54,7 +54,9 @@ const ProfileMiddleBar = () => {
     setTheme(systemTheme);
   }, [systemTheme]);
 
-  const isDarkMode = theme === "dark";
+  // const isDarkMode = theme === "dark";
+  const isDarkMode = false
+
   const backgroundColor = isDarkMode ? "#333" : "#FFF";
 
   // const router = useRouter(); // Initialize useRouter

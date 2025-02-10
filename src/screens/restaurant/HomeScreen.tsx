@@ -14,7 +14,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import NavigationBar from "../../components/NavigationBar";
 import RestroCard from "../../components/RestroCard";
-const RestaurantApp = () => {
+import HomeHeader from "../../components/HomeHeader";
+const RestaurantApp = ({ navigation }: any) => {
   const [data, setData] = useState([
     {
       name: "Sultan Kacchi Biryani",
@@ -31,7 +32,7 @@ const RestaurantApp = () => {
   const fetchRestaurantDetails = async () => {
     try {
       const response = await axios.get(
-        "https://webby-rl6u.onrender.com/api/restaurants/get"
+        "https://webby-rl6u.onrender.com/api/restaurants/get/1"
       );
       const restaurants = response.data; // Assuming the API response contains an array of restaurants
       console.log("Restaurant Details:", restaurants);
@@ -129,44 +130,20 @@ const RestaurantApp = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView >
+      <ScrollView stickyHeaderIndices={[0]} stickyHeaderHiddenOnScroll={true}>
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            {/* Address Bar */}
-            <TouchableOpacity style={styles.addressContainer}>
-              <View style={styles.addressLeft}>
-                <Ionicons name="location" size={20} color="#E23744" />
-                <View style={styles.addressTextContainer}>
-                  <Text style={styles.address}>Home</Text>
-                  <Text numberOfLines={1} style={styles.addressText}>
-                    123 Main Street, New York, NY 10001
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.addressRight}>
-                <Ionicons name="chevron-down" size={20} color="#666" />
-              </View>
-            </TouchableOpacity>
-            {/* Profile Button */}
-            <TouchableOpacity style={styles.profileContainer}>
-              <Ionicons name="person-circle-outline" size={30} color="#666" />
-            </TouchableOpacity>
+        <HomeHeader></HomeHeader>
+        {/* Search and Filter Container */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={24} color="#666" />
+            <TextInput style={styles.searchInput} placeholder="Search ..." />
           </View>
-
-          {/* Search and Filter Container */}
-          <View style={styles.searchRow}>
-            <View style={styles.searchContainer}>
-              <Ionicons name="search" size={24} color="#666" />
-              <TextInput style={styles.searchInput} placeholder="Search ..." />
-            </View>
-            <TouchableOpacity style={styles.filterContainer}>
-              <Ionicons name="options-outline" size={24} color="#E23744" />
-              <Text style={styles.filterText}>Filter</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.filterContainer}>
+            <Ionicons name="options-outline" size={24} color="#E23744" />
+            <Text style={styles.filterText}>Filter</Text>
+          </TouchableOpacity>
         </View>
-
         {/* Promotion Banner */}
         <View style={styles.promotionBanner}>
           <View>
@@ -220,36 +197,36 @@ const RestaurantApp = () => {
 
         {/* Featured Restaurants */}
         {data.map((restaurant, index) => (
-  <RestroCard 
-    key={index}
-    image={restaurant.image}
-    discount={restaurant.discount}
-    name={restaurant.name}
-    cuisine={restaurant.cuisine}
-    rating={restaurant.rating}
-    price={restaurant.price}
-    time={restaurant.time}
-  />
-))}
-
+          <RestroCard
+            key={index}
+            image={restaurant.image}
+            discount={restaurant.discount}
+            name={restaurant.name}
+            cuisine={restaurant.cuisine}
+            rating={restaurant.rating}
+            price={restaurant.price}
+            time={restaurant.time}
+          />
+        ))}
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <NavigationBar></NavigationBar>
+      <NavigationBar navigation={navigation}></NavigationBar>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
   },
   header: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     backgroundColor: "#fff",
-    position:'relative',
-    top:0
+    position: "relative",
+    top: 0,
   },
   headerRow: {
     flexDirection: "row",
@@ -288,6 +265,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 8,
+    paddingHorizontal: 16,
   },
   searchContainer: {
     flexDirection: "row",
