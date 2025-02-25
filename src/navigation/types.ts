@@ -8,4 +8,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Product: undefined;
   MenuItems: undefined;
+  RestaurantHomePage: undefined;
+  FooterButton: undefined;
+  SearchedRestro: undefined;
 }; 

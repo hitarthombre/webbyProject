@@ -36,24 +36,10 @@ const ProfileTopBar = () => {
         styles.container,
         { backgroundColor: isDarkMode ? "#121212" : "#FFF" },
       ]}>
-      <StatusBar
+      {/* <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor={isDarkMode ? "#121212" : "#FFF"}
-      />
-      <TouchableOpacity activeOpacity={0.8}>
-        <View
-          style={[
-            styles.topbar,
-            { backgroundColor: isDarkMode ? "#121212" : "#FFF" },
-          ]}>
-          <Ionicons
-            name="arrow-back"
-            size={35}
-            color={textColor}
-            style={styles.backArrow}
-          />
-        </View>
-      </TouchableOpacity>
+      /> */}
       <View
         style={[
           styles.bottombar,
