@@ -10,6 +10,8 @@ import HomeScreen from "./src/screens/restaurant/HomeScreen";
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import RegisterRestaurantScreen from "./src/screens/restaurant/RegisterRestaurantScreen";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 // import { Immersive } from 'react-native-immersive'
 const App = () => {
   useEffect(() => {``

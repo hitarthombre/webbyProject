@@ -9,6 +9,8 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  BackHandler,
+  Alert,
 } from "react-native";
 
 // imports of components
@@ -18,13 +20,26 @@ import ImageCarousel from "./RestaurantHomePageComponents/ImageCarousel";
 import Description from "./RestaurantHomePageComponents/Description";
 import FooterButton from "./RestaurantHomePageComponents/FooterButton";
 import OfferCard from "./RestaurantHomePageComponents/OfferCard";
+import NavigationBar from "../../components/NavigationBar";
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
 // const OfferCard = () => <View style={styles.offerCard} />;
-
-const SearchedRestro = () => {
-  // const { id } = useLocalSearchParams(); // Get restaurant ID from search params
+const SearchedRestro = ({ navigation, route }: any) => {
+  const { restaurant } = route.params; // Access params from route
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert("Hold on!", "Are you sure you want to exit?", [
+        { text: "Cancel", onPress: () => null, style: "cancel" },
+        { text: "YES", onPress: () => BackHandler.exitApp() } // Exits app
+      ]);
+      return true; // Prevent default back action
+    };
+  
+    BackHandler.addEventListener("hardwareBackPress", backAction);
+  
+    return () => BackHandler.removeEventListener("hardwareBackPress", backAction);
+  }, []);
   interface Restro {
     id: number;
     name: string;
@@ -42,22 +57,16 @@ const SearchedRestro = () => {
 
   const [restro, setRestro] = useState<Restro>({
     id: 1001,
-    name: "A1 Steakhouse",
+    name: restaurant.name,
     offer: "10%",
     description:
-      "A1 Steakhouse is a restaurant that serves high-quality steaks and other American classics.",
+      restaurant.description,
     time: "20 min",
     far: "2 km",
-    location: "Chowkhandi",
+    location: restaurant.address,
     avgCost: "Rs: 2000 for four",
-    rating: "6.5/10",
-    image: {
-      url1: "https://images.unsplash.com/photo-1556742393-d75f468bfcb0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxzZWFyY2h8MXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D",
-      url2: "https://plus.unsplash.com/premium_photo-1661883237884-263e8de8869b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D",
-      url3: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D",
-      url4: "https://plus.unsplash.com/premium_photo-1661433201283-fcb240e88ad4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D",
-      url5: "https://images.unsplash.com/photo-1497644083578-611b798c60f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D",
-    },
+    rating: restaurant.rating,
+    image: restaurant.image,
   }); // State to store restaurant details
   const [loading, setLoading] = useState(true); // Loading state for fetching data
   const [error, setError] = useState<string | null>(null); // Error state
@@ -139,11 +148,11 @@ const SearchedRestro = () => {
             {/* Image Carousel */}
             <ImageCarousel
               imageUrls={[
-                restro.image.url1,
-                restro.image.url2,
-                restro.image.url3,
-                restro.image.url4,
-                restro.image.url5,
+                restro.image[0],
+                restro.image[1],
+                restro.image[2],
+                restro.image[3],
+                restro.image[4],
               ]}
             />
 
@@ -156,6 +165,7 @@ const SearchedRestro = () => {
               location={location}
               description={description}
               avgCost={avgCost}
+              cuisine={restaurant.cuisine}
             />
 
             {/* Offers Section */}
@@ -170,7 +180,7 @@ const SearchedRestro = () => {
                     time={restro.time}
                     distance={restro.far}
                     offer={restro.offer}
-                    imageUrl={restro.image[`url${index + 1}`]} // Dynamically load each image URL
+                    imageUrl={restro.image[`${index + 1}`]} // Dynamically load each image URL
                   />
                 ))}
               </ScrollView>
@@ -193,6 +203,9 @@ const SearchedRestro = () => {
           <FooterButton title="Menu" id={restro.id} />
           <FooterButton title="Book" />
         </View>
+
+         {/* Bottom Navigation */}
+      <NavigationBar navigation={navigation}></NavigationBar>
       </View>
     </>
   );

@@ -2,14 +2,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./types";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
-import RestaurantPage from "../screens/restaurant/Restaurant";
 import RegisterRestaurantScreen from "../screens/restaurant/RegisterRestaurantScreen";
 import Search from "../screens/Search/Search";
 import Profile from "../screens/Profile/Profile";
 import Product from "../screens/Product/Product";
 import HomeScreen from "../screens/restaurant/HomeScreen";
 import MenuItemsScreen from "../screens/restaurant/MenuItemsScreen";
-import RestaurantHomePage from "../screens/restaurant/RestaurantHomePage";
 import FooterButton from "../screens/restaurant/RestaurantHomePageComponents/FooterButton";
 import SearchedRestro from "../screens/restaurant/RestaurantHomePage";
 
@@ -29,6 +27,7 @@ const AppNavigator = () => {
         component={LoginScreen}
         options={{ headerShown: false }}
       />
+      
       <Stack.Screen
         name="Register"
         component={RegisterScreen}
@@ -50,11 +49,6 @@ const AppNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="RestaurantPage"
-        component={RestaurantPage}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
         name="Search"
         component={Search}
         options={{ headerShown: false }}
@@ -69,18 +63,14 @@ const AppNavigator = () => {
         component={Product}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="RestaurantHomePage"
-        component={RestaurantHomePage}
-        options={{ headerShown: false }}
-      />
+     
       <Stack.Screen
         name="FooterButton"
         component={FooterButton}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="SearchedRestro"
+        name="RestaurantHomePage"
         component={SearchedRestro}
         options={{ headerShown: false }}
       />

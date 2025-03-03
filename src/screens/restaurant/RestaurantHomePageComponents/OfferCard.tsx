@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Dimensions, Image } from "react-native";
 import React from "react";
-// import { LinearGradient } from "expo-linear-gradient";
+import LinearGradient from "react-native-linear-gradient";
 
 const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
@@ -15,43 +15,50 @@ const OfferCard = ({
 }: any) => {
   return (
     <View style={{ flex: 1 }}>
-      {/* <LinearGradient
-        colors={["#F4D793", "#8E1616"]}
-        style={styles.OfferCard}
-        start={[1, 1]}
-        end={[0, 0]}> */}
-      <View style={styles.OfferCard}>
-        <View style={styles.Container}>
-          <View style={styles.Textcontainer}>
-            <Text style={styles.Restroname}>{name}</Text>
-            <Text style={styles.description}>{description}</Text>
-          </View>
+      <LinearGradient colors={["#F4D793", "#8E1616"]} style={styles.OfferCard}>
+        
+          <View style={styles.Container}>
+            <View style={styles.Textcontainer}>
+              <Text style={styles.Restroname}>{name}</Text>
+              <Text style={styles.description}>{description}</Text>
+            </View>
 
-          <View style={styles.imgContainer}>
-            <Image
-              source={{ uri: imageUrl }}
-              style={[
-                styles.image,
-                { transform: [{ rotateZ: "320deg" }, { rotateY: "15deg" }] },
-              ]}
-            />
-          </View>
-          <Text style={styles.overlayText}>
-            <Text style={styles.timeText}>
-              {time} : {distance}
+            <View style={styles.imgContainer}>
+              <Image
+                source={{ uri: imageUrl }}
+                style={[
+                  styles.image,
+                  { transform: [{ rotateZ: "320deg" }, { rotateY: "15deg" }] },
+                ]}
+              />
+            </View>
+            <Text style={styles.overlayText}>
+              <Text style={styles.timeText}>
+                {time} : {distance}
+              </Text>
             </Text>
-          </Text>
-          <Text style={styles.Offer}>
-            <Text style={styles.OfferText}>{offer}</Text>
-          </Text>
+            <Text style={styles.Offer}>
+              <Text style={styles.OfferText}>{offer}</Text>
+            </Text>
+          
         </View>
-      </View>
-      {/* </LinearGradient> */}
+      </LinearGradient>
     </View>
+   
   );
 };
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 24,
+    color: "#fff",
+    fontWeight: "bold",
+  },
   Container: {
     flexDirection: "row",
     justifyContent: "space-between",

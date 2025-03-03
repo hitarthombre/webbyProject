@@ -5,7 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
-const Description = ({ name, location, description, avgCost } :any) => {
+const Description = ({ name, location, description, avgCost,cuisine } :any) => {
   const [expanded, setExpanded] = React.useState(false);
 
   //   const fullDescription = `Experience luxury dining at its finest with panoramic city views. Our restaurant offers a perfect blend of traditional and modern cuisine, crafted by award-winning chefs. `;
@@ -16,6 +16,7 @@ const Description = ({ name, location, description, avgCost } :any) => {
     location,
     description,
     avgCost,
+    cuisine
   });
 
   const truncateText = (text: string, maxLength: number) => {
@@ -36,7 +37,7 @@ const Description = ({ name, location, description, avgCost } :any) => {
       <View style={styles.typeRow}>
         <View style={styles.cuisineContainer}>
           <Icon name="restaurant" size={16} color="#666" />
-          <Text style={styles.cuisineText}>Multi-Cuisine</Text>
+          <Text style={styles.cuisineText}>{cuisine}</Text>
         </View>
         <View style={styles.costContainer}>
           <Icon name="payment" size={16} color="#666" />

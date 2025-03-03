@@ -10,5 +10,4 @@ export type RootStackParamList = {
   MenuItems: undefined;
   RestaurantHomePage: undefined;
   FooterButton: undefined;
-  SearchedRestro: undefined;
 }; 

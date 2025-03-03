@@ -12,7 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 const Screenwidth = Dimensions.get("window").width;
 const Screenheight = Dimensions.get("window").height;
 
-const RestroCard = ({ image, discount, name, cuisine, rating, price }:any) => {
+const RestroCard = ({ image, discount, name, cuisine, rating, price,description }:any) => {
   const [isFavorite, setIsFavorite] = useState(false); // State for favorite icon
 
   const toggleFavorite = () => {
@@ -55,10 +55,10 @@ const RestroCard = ({ image, discount, name, cuisine, rating, price }:any) => {
               </View>
             </View>
             <Text style={styles.Cousin}>{cuisine}</Text>
-            <Text style={styles.Cousin}>{price}</Text>
+            {/* <Text style={styles.Cousin}>{price}</Text> */}
 
             <View style={styles.rowBox}>
-              <Text>Description : for restaurant</Text>
+              <Text style={{width:"70%",fontSize:11,color:"gray"}} numberOfLines={2}>{description}</Text>
               <TouchableOpacity style={styles.MenuButton}>
                 <Text style={styles.buttonText}>MENU</Text>
               </TouchableOpacity>

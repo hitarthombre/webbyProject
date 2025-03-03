@@ -8,6 +8,9 @@ import {
   StyleSheet,
   SafeAreaView,
   TextInput,
+  ActivityIndicator,
+  Modal,
+  FlatList,
 } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -15,6 +18,7 @@ import axios from "axios";
 import NavigationBar from "../../components/NavigationBar";
 import RestroCard from "../../components/RestroCard";
 import HomeHeader from "../../components/HomeHeader";
+import API_BASE_URL from "../../../config";
 const RestaurantApp = ({ navigation }: any) => {
   const [data, setData] = useState([
     {
@@ -26,19 +30,45 @@ const RestaurantApp = ({ navigation }: any) => {
       image:
         "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
       time: "20 min : 2 km",
+      description:"Trial for restaurant"
     },
   ]); // Initialize state for storing restaurant data
+
+  const [categories, setCategories] = useState([{
+    "_id": {
+      "$oid": "67bde51e2211272b98932cf6"
+    },
+    "name": "Pizza",
+    "image": "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1740498142/istockphoto-901501348-612x612_vrfhpi.jpg",
+    "__v": 0
+  }]); // Initialize state for storing categories
+  const [loading, setLoading] = useState(true); // Initialize state for managing loading state
 
   const fetchRestaurantDetails = async () => {
     try {
       const response = await axios.get(
-        "https://webby-rl6u.onrender.com/api/restaurants/get/1"
+        `${API_BASE_URL}/api/restaurants/get/1`
       );
       const restaurants = response.data; // Assuming the API response contains an array of restaurants
-      console.log("Restaurant Details:", restaurants);
+      // console.log("Restaurant Details:", restaurants);
       return restaurants;
     } catch (error: any) {
       console.error("Error fetching restaurant details:", error.message);
+    }
+  };
+
+  const fetchCategories = async () => {
+    // console.log("API_BASE_URL",API_BASE_URL);
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/homepage/getCategories`
+      );
+      
+      const categories = response.data; // Assuming the API response contains an array of categories
+      // console.log("/n/nCategories:/n/n", categories);
+      return categories;
+    } catch (error: any) {
+      console.error("Error fetching categories:", error.message);
     }
   };
 
@@ -48,102 +78,26 @@ const RestaurantApp = ({ navigation }: any) => {
       if (restaurants) {
         setData(restaurants); // Update state with the fetched data
       }
+      const categories = await fetchCategories();
+      if (categories) {
+        setCategories(categories); // Update state with the fetched categories
+      }
+
+      setLoading(false); // Hide loading modal once data is fetched
     };
     getData();
   }, []); // Empty dependency array ensures it runs only once on component mount
 
-  const categories = [
-    {
-      name: "Healthy",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg ",
-    },
-    {
-      name: "Home Style",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg ",
-    },
-    {
-      name: "Pizza",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg ",
-    },
-    {
-      name: "Chicken",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg ",
-    },
-  ];
-
-  const featuredRestaurants = [
-    {
-      name: "Sultan Kacchi Biryani",
-      cuisine: "Biryani, Desserts, Kacchi",
-      rating: "4.2 ★",
-      price: "₹250 for one",
-      discount: "20% OFF",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-    {
-      name: "Spicy Grill",
-      cuisine: "Grill, BBQ, Fast Food",
-      rating: "4.5 ★",
-      price: "₹300 for one",
-      discount: "15% OFF",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-    {
-      name: "Veggie Delight",
-      cuisine: "Vegetarian, Salads, Healthy",
-      rating: "4.0 ★",
-      price: "₹200 for one",
-      discount: "10% OFF",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-  ];
-
-  const newCategories = [
-    {
-      name: "Sushi",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-    {
-      name: "Burgers",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-    {
-      name: "Desserts",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-    {
-      name: "cake",
-      imageUrl:
-        "https://res.cloudinary.com/webbybyweber/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1734847416/cld-sample-4.jpg",
-    },
-  ];
-
   return (
     <SafeAreaView style={styles.container}>
+      <Modal transparent={true} visible={loading}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      </Modal>
       <ScrollView stickyHeaderIndices={[0]} stickyHeaderHiddenOnScroll={true}>
         {/* Header */}
         <HomeHeader></HomeHeader>
-        {/* Search and Filter Container */}
-        <View style={styles.searchRow}>
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={24} color="#666" />
-            <TextInput style={styles.searchInput} placeholder="Search ..." />
-          </View>
-          <TouchableOpacity style={styles.filterContainer}>
-            <Ionicons name="options-outline" size={24} color="#E23744" />
-            <Text style={styles.filterText}>Filter</Text>
-          </TouchableOpacity>
-        </View>
         {/* Promotion Banner */}
         <View style={styles.promotionBanner}>
           <View>
@@ -160,30 +114,20 @@ const RestaurantApp = ({ navigation }: any) => {
           />
         </View>
 
-        {/* Categories */}
-        <View style={styles.categoriesContainer}>
-          {categories.map((category) => (
-            <View key={category.name} style={styles.categoryItem}>
-              <Image
-                source={{ uri: category.imageUrl }}
-                style={styles.categoryImage}
-              />
-              <Text style={styles.categoryText}>{category.name}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* New Categories */}
-        <View style={styles.categoriesContainer}>
-          {newCategories.map((category) => (
-            <View key={category.name} style={styles.categoryItem}>
-              <Image
-                source={{ uri: category.imageUrl }}
-                style={styles.categoryImage}
-              />
-              <Text style={styles.categoryText}>{category.name}</Text>
-            </View>
-          ))}
+        <View style={styles.categoriesWrapper}>
+          <FlatList 
+            data={categories}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal={true} // Enable horizontal scrolling
+            showsHorizontalScrollIndicator={false} // Hide scrollbar
+            contentContainerStyle={styles.categoriesContainer} // Apply spacing styles
+            renderItem={({ item }) => (
+              <View style={styles.categoryItem}>
+                <Image source={{ uri: item.image }} style={styles.categoryImage} />
+                <Text style={styles.categoryText}>{item.name}</Text>
+              </View>
+            )}
+          />
         </View>
 
         {/* Restaurant Count */}
@@ -197,16 +141,20 @@ const RestaurantApp = ({ navigation }: any) => {
 
         {/* Featured Restaurants */}
         {data.map((restaurant, index) => (
-          <RestroCard
-            key={index}
-            image={restaurant.image}
-            discount={restaurant.discount}
-            name={restaurant.name}
-            cuisine={restaurant.cuisine}
-            rating={restaurant.rating}
-            price={restaurant.price}
-            time={restaurant.time}
-          />
+          <TouchableOpacity onPress={()=>navigation.navigate("RestaurantHomePage",{restaurant})} key={index}>
+            <RestroCard
+              // key={index}
+              image={restaurant.image[0]}
+              discount={restaurant.discount}
+              name={restaurant.name}
+              cuisine={restaurant.cuisine}
+              rating={restaurant.rating}
+              price={restaurant.price}
+              time={restaurant.time}
+              description={restaurant.description}
+
+            />
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
@@ -220,6 +168,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  categoriesWrapper: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   header: {
     paddingHorizontal: 16,
@@ -331,8 +283,10 @@ export const styles = StyleSheet.create({
   categoriesContainer: {
     paddingHorizontal: 16,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     marginBottom: 16,
+    flexWrap: "wrap",
+    gap: 26,
   },
   categoryItem: {
     alignItems: "center",
@@ -450,6 +404,12 @@ export const styles = StyleSheet.create({
   navText: {
     fontSize: 12,
     marginTop: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
 
