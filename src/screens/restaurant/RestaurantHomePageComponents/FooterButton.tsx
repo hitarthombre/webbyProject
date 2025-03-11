@@ -11,7 +11,7 @@ import React from "react";
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 //   const route = useRouter();
 
-const FooterButton = ({ title, id, navigation }: any) => {
+const FooterButton = ({ title, id, navigation,screen }: any) => {
   // const router = useRouter();
 
   const handleItemPress = (screen: string) => {
@@ -23,8 +23,8 @@ const FooterButton = ({ title, id, navigation }: any) => {
     style={styles.footerButton}
     onPress={() => {
       console.log(id);
-      navigation.navigate("MenuItems");
-      handleItemPress("MenuItems");
+      // handleItemPress(screen);
+      // navigation.navigate("Home");
     }}
   >
     <Text style={styles.footerButtonText}>{title}</Text>

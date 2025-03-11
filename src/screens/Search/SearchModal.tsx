@@ -27,9 +27,9 @@ const SearchModal = ({
         onSuggestionPress(item);
         setModalVisible(false); // Close modal on selection
       }}>
-      <Image source={{ uri: item.image }} style={styles.suggestionImage} />
+      <Image source={{ uri: item.image[0] }} style={styles.suggestionImage} />
       <View style={{ marginLeft: 10, flex: 1 }}>
-        <Text style={styles.suggestionName}>{item.name}</Text>
+        <Text style={styles.suggestionName}>{item.restaurantName}</Text>
         <Text style={styles.suggestionDesc} numberOfLines={2}>
           {item.description}
         </Text>

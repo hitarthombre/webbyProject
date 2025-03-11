@@ -1,7 +1,8 @@
-import { View, Image, Alert, Pressable } from "react-native";
+import { View, Image, Alert } from "react-native";
 import { Input, Button, Text } from "@ui-kitten/components";
 import tw from "twrnc";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import * as SecureStore from 'expo-secure-store';
 import { colors } from "../../theme/colors";
 import {
   signOutFromGoogle,
@@ -9,48 +10,98 @@ import {
   validateEmail,
   validatePass,
   hasPreviousSignIn,
-  getCurrentUser,
 } from "../../utils/authHelpers";
 import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import axios from "axios";
 import userStore from "../../zustand/userStore";
 import API_BASE_URL from "../../../config";
+
 const LoginScreen = ({ navigation }: any) => {
-  const { setUser, getUser } = userStore();
+  const { setUser,clearUser } = userStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isInProgress, setIsInProgress] = useState(false);
-  // google sign-in
+
+  // Check for existing login on component mount
+  useEffect(() => {
+    checkPreviousLogin();
+  }, []);
+
+  // Check if user is already logged in
+  const checkPreviousLogin = async () => {
+    try {
+      const userJson = await SecureStore.getItemAsync('user');
+      if (userJson) {
+        const storedUser = JSON.parse(userJson);
+        setUser(storedUser);
+        console.log("Previous login:", storedUser._id);
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.error("Error checking previous login:", error);
+    }
+  };
+
+  // Google Sign-In handler
   const handleGoogleSignIn = async () => {
     setIsInProgress(true);
-    // const currentUser = await hasPreviousSignIn();
-    // if (currentUser) {
-    //   const loggedInUser = {'email' : currentUser.user.email, 'idToken' : currentUser.user.id, 'name' : currentUser.user.name, 'photoUrl' : currentUser.user.photo};
-    //   setUser(loggedInUser);
-    // }
+    const currentUser = await hasPreviousSignIn();
+    
+    if (currentUser) {
+      const loggedInUser = {
+        'email': currentUser.user.email, 
+        'idToken': currentUser.user.id, 
+        'name': currentUser.user.name, 
+        'photoUrl': currentUser.user.photo
+      };
+
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/users/login`, {
+          params: {
+            email: loggedInUser.email,
+            idToken: loggedInUser.idToken,
+          },
+        });
+
+        // Store user in SecureStore
+        await SecureStore.setItemAsync('user', JSON.stringify(response.data.user));
+        
+        setUser(response.data.user);
+        navigation.navigate("Home");
+      } catch (error) {
+        console.error("Google Sign-In Error:", error);
+        Alert.alert("Sign-In Failed", "Please try again.");
+        signOutFromGoogle();
+      } finally {
+        setIsInProgress(false);
+      }
+      return;
+    }
 
     try {
       const userInfo = await signUpWithGoogle();
       if (userInfo.type === "success") {
-        // fetch user from server
         const user = {
           idToken: userInfo.data?.idToken,
           email: userInfo.data?.user.email,
         };
-        // console.log("email:"+user.idToken)
+
         const response = await axios.get(`${API_BASE_URL}/api/users/login`, {
           params: {
             email: user.email,
             idToken: user.idToken,
           },
         });
-        // check if user exists
+
         if (response.data.status === false) {
           Alert.alert(response.data.message);
           signOutFromGoogle();
           setIsInProgress(false);
           return;
         } else {
+          // Store user in SecureStore
+          await SecureStore.setItemAsync('user', JSON.stringify(response.data.user));
+          
           if (response.status === 201) {
             Alert.alert(
               "Sign-In Successful",
@@ -70,6 +121,7 @@ const LoginScreen = ({ navigation }: any) => {
     }
   };
 
+  // Email/Password Login handler
   const handleLogin = async () => {
     setIsInProgress(true);
     if (!validateEmail(email) || !validatePass(password)) {
@@ -77,38 +129,59 @@ const LoginScreen = ({ navigation }: any) => {
       setPassword("");
       setIsInProgress(false);
       return;
-    } else {
-      // continue login process
-      try {
-        const user = { email, password };
-        const response = await axios.get(
-          `${API_BASE_URL}/api/users/loginbyemail`,
-          {
-            params: {
-              email: user.email,
-              password: user.password,
-            },
-          }
-        );
-        console.log(password, "res:" + response);
-        if (response.data.status === false) {
-          Alert.alert("Invalid email or password");
-          setPassword("");
-          return;
-        } else {
-          Alert.alert("Login Successful");
-          navigation.navigate("Home");
-          setUser(response.data.user);
+    }
+
+    try {
+      const user = { email, password };
+      const response = await axios.get(
+        `${API_BASE_URL}/api/users/loginbyemail`,
+        {
+          params: {
+            email: user.email,
+            password: user.password,
+          },
         }
-      } catch (error) {
-        Alert.alert(
-          error instanceof Error
-            ? error.message
-            : "Login failed. Please try again."
-        );
-      } finally {
-        setIsInProgress(false);
+      );
+
+      if (response.data.status === false) {
+        Alert.alert("Invalid email or password");
+        setPassword("");
+        return;
+      } else {
+        // Store user in SecureStore
+        await SecureStore.setItemAsync('user', JSON.stringify(response.data.user));
+        
+        Alert.alert("Login Successful");
+        navigation.navigate("Home");
+        setUser(response.data.user);
       }
+    } catch (error) {
+      Alert.alert(
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again."
+      );
+    } finally {
+      setIsInProgress(false);
+    }
+  };
+
+  // Logout function (to be used in Home or Profile screen)
+  const handleLogout = async () => {
+    try {
+      // Remove user from SecureStore
+      await SecureStore.deleteItemAsync('user');
+      
+      // Sign out from Google if needed
+      await signOutFromGoogle();
+      
+      // Clear user in global state
+      clearUser();
+      
+      // Navigate back to Login
+      navigation.navigate("Login");
+    } catch (error) {
+      console.error("Logout Error:", error);
     }
   };
 
@@ -117,10 +190,9 @@ const LoginScreen = ({ navigation }: any) => {
       <Image
         source={require("../../../assets/images/auth_icon.png")}
         style={tw`w-full h-30 mb-8`}
-      ></Image>
+      />
       <Text style={tw`text-2xl mb-8 text-center font-bold`}>Login</Text>
       <Input
-        // verify user entered correct email accoring to syntax
         keyboardType="email-address"
         placeholder="Email"
         value={email}
@@ -151,28 +223,15 @@ const LoginScreen = ({ navigation }: any) => {
       >
         Don't have an account? Register
       </Button>
-      {/* google login */}
-      {/* <Pressable
-        style={tw`flex-row justify-center items-center mt-4`}
-        onPress={handleGoogleSignIn}
-      >
-        <View style={tw`w-10 h-10 rounded-full`}>
-          <Image
-            source={require("../../../assets/images/google_icon.png")}
-            style={tw`w-full h-full`}
-          ></Image>
-        </View>
-      </Pressable> */}
 
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={() => {
-          handleGoogleSignIn();
-        }}
+        onPress={handleGoogleSignIn}
         disabled={isInProgress}
       />
     </View>
   );
 };
+
 export default LoginScreen;

@@ -7,16 +7,18 @@ import Search from "../screens/Search/Search";
 import Profile from "../screens/Profile/Profile";
 import Product from "../screens/Product/Product";
 import HomeScreen from "../screens/restaurant/HomeScreen";
-import MenuItemsScreen from "../screens/restaurant/MenuItemsScreen";
 import FooterButton from "../screens/restaurant/RestaurantHomePageComponents/FooterButton";
 import SearchedRestro from "../screens/restaurant/RestaurantHomePage";
+import RestaurantBooking from "../screens/restaurant/RestaurantBooking";
+import CategoryScreen from "../screens/restaurant/CategoryScreen";
+import MenuScreen from "../screens/restaurant/MenuScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName="Login"
       screenOptions={{
         headerShown: true,
         headerBackTitle: "Back",
@@ -35,8 +37,8 @@ const AppNavigator = () => {
       />
       <Stack.Screen
         name="MenuItems"
-        component={MenuItemsScreen}
-        options={{ headerShown: false }}
+        component={MenuScreen}
+        options={{ headerShown: true }}
       />
       <Stack.Screen
         name="Home"
@@ -72,7 +74,18 @@ const AppNavigator = () => {
       <Stack.Screen
         name="RestaurantHomePage"
         component={SearchedRestro}
-        options={{ headerShown: false }}
+        options={{ headerShown: false , title: "Restaurant" }}
+      />
+      <Stack.Screen
+        name="RestaurantBooking"
+        component={RestaurantBooking}
+        options={{ headerShown: false, title: "Restaurant Booking" }}
+        
+      />
+      <Stack.Screen
+        name="categories"
+        component={CategoryScreen}
+        options={{ headerShown: false, title: "Restaurant Booking" }}
       />
     </Stack.Navigator>
   );

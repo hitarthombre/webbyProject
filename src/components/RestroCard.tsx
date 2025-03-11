@@ -6,66 +6,102 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import API_BASE_URL from "../../config";
 
 const Screenwidth = Dimensions.get("window").width;
 const Screenheight = Dimensions.get("window").height;
 
-const RestroCard = ({ image, discount, name, cuisine, rating, price,description }:any) => {
+const RestroCard = ({
+  image,
+  discount,
+  name,
+  cuisine,
+  rating,
+  description,
+  time,
+  restaurantId,
+  promoted,
+}: any) => {
+  const navigation = useNavigation();
   const [isFavorite, setIsFavorite] = useState(false); // State for favorite icon
-
+  const [restaurant, setRestaurant] = useState({});
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
 
+  const formatTime = () => {
+    return `${time.open} - ${time.close}`;
+  };
+
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      try {
+        const response = await axios.get(`http://192.168.19.37:3000/api/restaurants/getOne/${restaurantId}`);
+        setRestaurant(response.data);
+      } catch (error) {
+        // console.error("Error fetching restaurant data: ", error);
+      }
+    };
+
+    fetchRestaurant();
+  }, [restaurantId]);
+  
   return (
     <View style={styles.container}>
-      <View style={styles.Box}>
-        <View>
-          <Image source={{ uri: image }} style={styles.img} />
-          {discount && (
-            <View style={styles.Timing}>
-              <Text style={styles.TiText}>{discount}</Text>
+      <TouchableOpacity style={styles.Box} onPress={() => navigation.navigate("RestaurantHomePage", {restaurant})}>
+        <Image source={{ uri: image }} style={styles.img} />
+        
+       
+        
+        
+        
+        <TouchableOpacity
+          onPress={toggleFavorite}
+          style={styles.favoriteIcon}
+        >
+          <MaterialIcons
+            name="favorite"
+            size={24}
+            color={isFavorite ? "red" : "gray"}
+          />
+        </TouchableOpacity>
+
+        <View style={styles.contentContainer}>
+          <View style={styles.restaurantHeader}>
+            <Text style={styles.RestroName}>{name}</Text>
+            <View style={styles.ratcontainer}>
+              <Text style={styles.ratingText}>{rating}</Text>
+              <MaterialIcons name="star" size={16} color="#FFF" />
             </View>
-          )}
-          <View style={[styles.Timing]}>
-            <Text style={styles.TiText}>8:00 AM - 10:00 PM</Text>
           </View>
-          <TouchableOpacity
-            onPress={toggleFavorite}
-            style={styles.favoriteIcon}>
-            <MaterialIcons
-              name="favorite"
-              size={24}
-              color={isFavorite ? "red" : "gray"}
-            />
-          </TouchableOpacity>
-
-          <Text style={styles.overlayText}>
-            <Text style={styles.timeText}>20 min : 2 km</Text>
+          
+          <Text style={styles.Cousin}>{cuisine}</Text>
+          
+          <Text
+            style={styles.descriptionText}
+            numberOfLines={2}
+          >
+            {description}
           </Text>
-
-          <View style={styles.contentContainer}>
-            <View style={styles.rowBox}>
-              <Text style={styles.RestroName}>{name}</Text>
-              <View style={styles.ratcontainer}>
-                <Text style={styles.ratingText}>{rating}</Text>
-                <MaterialIcons name="star" size={24} color="#EAC452" />
+          
+          <View style={styles.restaurantFooter}>
+            <View style={styles.timeContainer}>
+              <MaterialIcons name="access-time" size={16} color="#666" />
+              <Text style={styles.footerTimeText}>{formatTime()}</Text>
+            </View>
+            
+            {promoted && (
+              <View style={styles.promotedTag}>
+                <Text style={styles.promotedText}>Promoted</Text>
               </View>
-            </View>
-            <Text style={styles.Cousin}>{cuisine}</Text>
-            {/* <Text style={styles.Cousin}>{price}</Text> */}
-
-            <View style={styles.rowBox}>
-              <Text style={{width:"70%",fontSize:11,color:"gray"}} numberOfLines={2}>{description}</Text>
-              <TouchableOpacity style={styles.MenuButton}>
-                <Text style={styles.buttonText}>MENU</Text>
-              </TouchableOpacity>
-            </View>
+            )}
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -80,112 +116,141 @@ const styles = StyleSheet.create({
   Box: {
     width: "100%",
     maxWidth: 500,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 5,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
     backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   contentContainer: {
-    padding: 15,
+    padding: 16,
   },
   img: {
     width: "100%",
-    height: Screenheight * 0.2,
+    height: 200,
     resizeMode: "cover",
+    backgroundColor: "#F0F0F0",
+  },
+  restaurantHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
   },
   RestroName: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
+    fontWeight: "600",
+    color: "#1A1A1A",
     flex: 1,
     marginRight: 10,
-    marginTop: -10,
   },
   Cousin: {
-    fontSize: 11,
-    color: "gray",
-    marginTop: -2,
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
   },
-  rowBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  descriptionText: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
   },
   ratcontainer: {
     flexDirection: "row",
-    backgroundColor: "#417C45",
-    borderRadius: 8,
-    padding: 5,
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
     alignItems: "center",
   },
   ratingText: {
-    color: "white",
-    marginRight: 5,
-  },
-  Timing: {
-    bottom: "45%",
-    position: "absolute",
-    left: "4%",
+    color: "#FFF",
+    marginRight: 4,
     fontWeight: "600",
-    backgroundColor: "white",
-    padding: 5,
-    borderRadius: 5,
-    marginBottom:14
   },
-  MenuButton: {
-    backgroundColor: "#009999",
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  TiText: {
-    fontSize: 10,
-  },
-  overlayText: {
+  discountTag: {
     position: "absolute",
-    top: 15,
-    left: 15,
+    bottom: "58%",
+    left: "4%",
     backgroundColor: "white",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 8,
+    padding: 8,
+    borderRadius: 5,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    opacity: 0.8,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  discountText: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  timeTag: {
+    position: "absolute",
+    bottom: "50%",
+    left: "4%",
+    backgroundColor: "white",
+    padding: 8,
+    borderRadius: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  timeTagText: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   favoriteIcon: {
     position: "absolute",
-    top: "22%",
-    left: "100%",
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    opacity: 0.5,
-    borderWidth: 2,
-    borderColor: "white",
-    borderRadius: 12,
-    padding: 4,
-    color: "white",
+    top: 20,
+    right: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 20,
+    padding: 8,
   },
-  timeText: {
-    color: "green",
-    fontWeight: "700",
+  overlayDetails: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  timeInfo: {
+    color: "#4CAF50",
+    fontWeight: "600",
     fontSize: 12,
+  },
+  restaurantFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  footerTimeText: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 4,
+  },
+  promotedTag: {
+    backgroundColor: "#FF4B3A",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  promotedText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "500",
   },
 });
 

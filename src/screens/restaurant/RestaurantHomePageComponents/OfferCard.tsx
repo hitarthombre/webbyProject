@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Dimensions, Image } from "react-native";
 import React from "react";
-import LinearGradient from "react-native-linear-gradient";
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from '@expo/vector-icons';
 
-const screenHeight = Dimensions.get("window").height;
-const screenWidth = Dimensions.get("window").width;
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const OfferCard = ({
   name,
@@ -12,152 +12,108 @@ const OfferCard = ({
   distance,
   offer,
   imageUrl,
-}: any) => {
+  onPress,
+}:any) => {
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient colors={["#F4D793", "#8E1616"]} style={styles.OfferCard}>
-        
-          <View style={styles.Container}>
-            <View style={styles.Textcontainer}>
-              <Text style={styles.Restroname}>{name}</Text>
-              <Text style={styles.description}>{description}</Text>
-            </View>
-
-            <View style={styles.imgContainer}>
-              <Image
-                source={{ uri: imageUrl }}
-                style={[
-                  styles.image,
-                  { transform: [{ rotateZ: "320deg" }, { rotateY: "15deg" }] },
-                ]}
-              />
-            </View>
-            <Text style={styles.overlayText}>
-              <Text style={styles.timeText}>
-                {time} : {distance}
-              </Text>
-            </Text>
-            <Text style={styles.Offer}>
-              <Text style={styles.OfferText}>{offer}</Text>
-            </Text>
-          
+    <TouchableOpacity 
+      style={styles.cardContainer}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        <View style={styles.offerBadge}>
+          <Text style={styles.offerText}>{offer} OFF</Text>
         </View>
-      </LinearGradient>
-    </View>
-   
+      </View>
+      
+      <View style={styles.contentContainer}>
+        <Text style={styles.nameText} numberOfLines={1}>{name}</Text>
+        <Text style={styles.descriptionText} numberOfLines={2}>{description}</Text>
+        
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailItem}>
+            <Ionicons name="time-outline" size={14} color="#666" />
+            <Text style={styles.detailText}>{time}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Ionicons name="location-outline" size={14} color="#666" />
+            <Text style={styles.detailText}>{distance}</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 24,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  Container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flex: 1,
-  },
-  OfferCard: {
+  cardContainer: {
     width: screenWidth * 0.7,
-    height: screenHeight * 0.13,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#FFE5AD",
-    marginHorizontal: 5,
-    marginTop: 10,
-    marginBottom: 10,
-    shadowColor: "black",
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 5,
-    padding: 10,
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
     overflow: "hidden",
+    marginRight: 16,
   },
-  Textcontainer: {
-    width: screenWidth * 0.45,
-    height: screenHeight * 0.098,
-    padding: 1,
-  },
-  Restroname: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#FBF5E5",
-  },
-  description: {
-    color: "#FFF",
-    fontSize: 10,
-  },
-  imgContainer: {
-    width: screenWidth * 0.2,
+  imageContainer: {
+    height: screenHeight * 0.12,
+    width: "100%",
+    position: "relative",
   },
   image: {
-    width: screenWidth * 0.33,
-    height: screenHeight * 0.33,
-    resizeMode: "contain",
-    overflow: "hidden",
+    width: "100%",
+    height: "100%",
   },
-  timeText: {
-    color: "green",
+  offerBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#FF4B3A",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  offerText: {
+    color: "#FFF",
     fontWeight: "700",
-    fontSize: 10,
+    fontSize: 12,
   },
-  overlayText: {
-    height: "50%",
-    width: screenWidth * 0.35,
-    position: "absolute",
-    top: 60,
-    left: 10,
-    marginTop: 2,
-
-    backgroundColor: "white",
-    paddingHorizontal: 30,
-    paddingVertical: 5,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 3.84,
-    elevation: 5,
-    opacity: 0.8,
+  contentContainer: {
+    padding: 12,
   },
-  Offer: {
-    height: screenHeight * 0.06,
-    width: screenWidth * 0.12,
-    position: "absolute",
-    left: "62%",
-    padding: 4,
-    paddingVertical: 15,
-    bottom: "60%",
-    borderBottomLeftRadius: 4,
-    borderBottomRightRadius: 4,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 3.84,
-    elevation: 5,
-    opacity: 0.9,
-    backgroundColor: "#fff",
+  nameText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    marginBottom: 4,
   },
-  OfferText: {
-    justifyContent: "center",
+  descriptionText: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 8,
+    lineHeight: 16,
+  },
+  detailsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  detailItem: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 4,
   },
+  detailText: {
+    fontSize: 12,
+    color: "#666",
+  }
 });
 
 export default OfferCard;

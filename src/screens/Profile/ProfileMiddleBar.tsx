@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons"; // Importing icons from expo
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const ProfileMiddleBar = () => {
+const ProfileMiddleBar = ({user}:any) => {
   // Dictionary to store data with title, icon name, id, color, and path
   const dataDict = {
     1: {

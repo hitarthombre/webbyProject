@@ -4,6 +4,7 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 
+import * as SecureStore from 'expo-secure-store';
 
 // configure Google Sign In
 export const configureGoogleSignIn = async () => {
@@ -42,6 +43,7 @@ export const signUpWithGoogle = async () => {
 export const signOutFromGoogle = async () => {
   try {
     await GoogleSignin.signOut();// Sign out from Google
+    await SecureStore.deleteItemAsync('user');
     console.log('User signed out');
   } catch (error) {
     console.error('Error signing out:', error);

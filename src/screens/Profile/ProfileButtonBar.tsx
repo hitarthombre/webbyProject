@@ -7,13 +7,16 @@ import {
   useColorScheme,
   Dimensions,
 } from "react-native";
+import { signOutFromGoogle } from "../../utils/authHelpers";
 import { MaterialIcons } from "@expo/vector-icons"; // Example icon library
+import { useNavigation } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const ProfileButtonBar = () => {
+const ProfileButtonBar = ({ user }: any) => {
+  const navigation = useNavigation();
   const systemTheme = useColorScheme();
   const [theme, setTheme] = useState(systemTheme);
 
@@ -22,7 +25,7 @@ const ProfileButtonBar = () => {
   }, [systemTheme]);
 
   // const isDarkMode = theme === "dark";
-const isDarkMode = false
+  const isDarkMode = false;
   // const router = useRouter();
 
   const goSettings = () => {
@@ -43,33 +46,22 @@ const isDarkMode = false
       style={[
         styles.container,
         { backgroundColor: isDarkMode ? "#121212" : "#FFF" },
-      ]}>
-      {/* First Button */}
-      <TouchableOpacity activeOpacity={0.8} style={styles.button}>
-        <MaterialIcons
-          name="bookmark"
-          size={30}
-          color={isDarkMode ? "#FFF" : "#000"}
-          onPress={goBookMark}
-        />
-        <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
-          Bookmarks
-        </Text>
-      </TouchableOpacity>
-
+      ]}
+    >
       {/* Second Button */}
       <TouchableOpacity
         activeOpacity={0.8}
         style={styles.button}
-        onPress={goSettings}>
+        onPress={goSettings}
+      >
         <MaterialIcons
           name="settings"
           size={30}
           color={isDarkMode ? "#FFF" : "#000"}
         />
         <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
           Settings
         </Text>
       </TouchableOpacity>
@@ -83,7 +75,8 @@ const isDarkMode = false
           onPress={goNotification}
         />
         <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
           Notifications
         </Text>
       </TouchableOpacity>
@@ -97,15 +90,49 @@ const isDarkMode = false
           onPress={gohelp}
         />
         <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
           Help
         </Text>
       </TouchableOpacity>
+
+      {/* Sign Out Button */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={async() => {
+          await signOutFromGoogle();
+          navigation.navigate("Login");
+        }}
+      >
+        <View style={styles.signOutButton}>
+          <MaterialIcons name="logout" size={24} color="#FFF"/>
+        </View>
+        <Text
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
+          Log Out
+        </Text>
+      </TouchableOpacity>
+      
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  signOutButton: {
+    // position: "absolute",
+    // bottom: 20,
+    // right: 20,
+    backgroundColor: "red",
+    borderRadius: 50,
+    padding: 4,
+    paddingHorizontal: 8,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+  },
   container: {
     flexDirection: "row",
     justifyContent: "space-around",

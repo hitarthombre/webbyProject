@@ -10,16 +10,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Use } from "react-native-svg";
 
 // Get the screen width and height
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const ProfileTopBar = () => {
+const ProfileTopBar = ({user}:any) => {
   const systemTheme = useColorScheme();
   const [theme, setTheme] = useState(systemTheme);
 
   useEffect(() => {
+    console.log("hello"+user.name);
     setTheme(systemTheme);
   }, [systemTheme]);
 
@@ -48,10 +50,10 @@ const ProfileTopBar = () => {
         {/* Text Section */}
         <View style={styles.textSection}>
           <Text style={[styles.profileName, { color: textColor }]}>
-            Alien MSU
+            {user.name}
           </Text>
           <Text style={[styles.profileEmail, { color: textColor }]}>
-            alienmsu@gmail.com
+            {user.email}
           </Text>
           <TouchableOpacity activeOpacity={0.8}>
             <Text style={[styles.profileViewActivity, { color: redColor }]}>

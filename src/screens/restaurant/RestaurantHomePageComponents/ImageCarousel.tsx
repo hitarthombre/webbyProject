@@ -1,129 +1,67 @@
-import { View, FlatList, Dimensions, Image, StyleSheet } from "react-native";
-import React from "react";
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Image, StyleSheet, Dimensions, FlatList } from 'react-native';
 
-const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get('window');
 
-const ImageCarousel = ({ imageUrls }: { imageUrls: string[] }) => {
-  const flatListRef = React.useRef<FlatList>(null);
-  const [currentIndex, setCurrentIndex] = React.useState(1);
-  const [isResetting, setIsResetting] = React.useState(false);
+interface ImageCarouselProps {
+  imageUrls: string[];
+  onIndexChange?: (index: number) => void;
+}
 
-  const loopedImages = [
-    { url: imageUrls[imageUrls.length - 1], id: "start-clone" },
-    ...imageUrls.map((url, index) => ({ url, id: index.toString() })),
-    { url: imageUrls[0], id: "end-clone" },
-  ];
+const ImageCarousel = ({ imageUrls, onIndexChange }: ImageCarouselProps) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isResetting && flatListRef.current) {
-        const nextIndex = currentIndex + 1;
-        flatListRef.current.scrollToIndex({ index: nextIndex, animated: true });
-        handleIndexChange(nextIndex);
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      const newIndex = viewableItems[0].index;
+      setActiveIndex(newIndex);
+      if (onIndexChange) {
+        onIndexChange(newIndex);
       }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [currentIndex, isResetting]);
-
-  const handleIndexChange = (index: number) => {
-    if (index === loopedImages.length - 1 && flatListRef.current) {
-      setIsResetting(true);
-      setTimeout(() => {
-        setCurrentIndex(1);
-        flatListRef.current?.scrollToOffset({
-          offset: screenWidth,
-          animated: false,
-        });
-        setIsResetting(false);
-      }, 300);
-    } else if (index === 0 && flatListRef.current) {
-      setIsResetting(true);
-      setTimeout(() => {
-        setCurrentIndex(imageUrls.length);
-        flatListRef.current?.scrollToOffset({
-          offset: screenWidth * imageUrls.length,
-          animated: false,
-        });
-        setIsResetting(false);
-      }, 300);
-    } else {
-      setCurrentIndex(index);
     }
+  }).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50
+  }).current;
+
+  const renderItem = ({ item }: { item: string }) => {
+    return (
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: item }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      </View>
+    );
   };
 
   return (
-    <View style={styles.carouselContainer}>
-      <FlatList
-        ref={flatListRef}
-        data={loopedImages}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Image
-            source={{ uri: item.url }}
-            style={styles.carouselImage}
-            resizeMode="cover"
-          />
-        )}
-        initialScrollIndex={1}
-        getItemLayout={(data, index) => ({
-          length: screenWidth,
-          offset: screenWidth * index,
-          index,
-        })}
-        onMomentumScrollEnd={(event) => {
-          const newIndex = Math.round(
-            event.nativeEvent.contentOffset.x / screenWidth
-          );
-          handleIndexChange(newIndex);
-        }}
-      />
-      <View style={styles.pagination}>
-        {imageUrls.map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.paginationDot,
-              currentIndex === i + 1 ? styles.activeDot : styles.inactiveDot,
-            ]}
-          />
-        ))}
-      </View>
-    </View>
+    <FlatList
+      ref={flatListRef}
+      data={imageUrls}
+      renderItem={renderItem}
+      keyExtractor={(_, index) => index.toString()}
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={viewabilityConfig}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  carouselContainer: {
-    height: screenHeight * 0.25,
+  imageContainer: {
     width: screenWidth,
+    height: '100%',
   },
-  carouselImage: {
-    width: screenWidth,
-    height: screenHeight * 0.25,
-  },
-  pagination: {
-    flexDirection: "row",
-    position: "absolute",
-    bottom: 10,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  paginationDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  activeDot: {
-    backgroundColor: "#333",
-  },
-  inactiveDot: {
-    backgroundColor: "#ccc",
-  },
+  image: {
+    width: '100%',
+    height: '100%',
+  }
 });
 
 export default ImageCarousel;

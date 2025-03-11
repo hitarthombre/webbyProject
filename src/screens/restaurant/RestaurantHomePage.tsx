@@ -1,111 +1,134 @@
 import React, { useEffect, useState } from "react";
-// import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   StatusBar,
   View,
   Text,
   Dimensions,
   StyleSheet,
-  Image,
   ScrollView,
-  ActivityIndicator,
-  BackHandler,
   Alert,
+  BackHandler,
+  TouchableOpacity,
+  Platform,
+  Linking,
 } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 
 // imports of components
 import Header from "./RestaurantHomePageComponents/Header";
 import Rating from "./RestaurantHomePageComponents/Rating";
 import ImageCarousel from "./RestaurantHomePageComponents/ImageCarousel";
 import Description from "./RestaurantHomePageComponents/Description";
-import FooterButton from "./RestaurantHomePageComponents/FooterButton";
-import OfferCard from "./RestaurantHomePageComponents/OfferCard";
 import NavigationBar from "../../components/NavigationBar";
+import { useNavigation } from "@react-navigation/native";
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
-// const OfferCard = () => <View style={styles.offerCard} />;
-const SearchedRestro = ({ navigation, route }: any) => {
-  const { restaurant } = route.params; // Access params from route
+const SearchedRestro = ({ route }: any) => {
+  const navigation  = useNavigation();
+  const { restaurant } = route.params;
+
+  // Static coordinates for Polytechnic, Nizampura, near Shastri Bridge, Vadodara, Gujarat
+  const coordinates = {
+    latitude: 22.3117,
+    longitude: 73.1823,
+  };
+
+  const openInMaps = () => {
+    const mapUrl = Platform.select({
+      ios: `maps://app?saddr=Current+Location&daddr=${coordinates.latitude},${coordinates.longitude}`,
+      android: `google.navigation:q=${coordinates.latitude},${coordinates.longitude}`
+    });
+    
+    Linking.canOpenURL(mapUrl).then(supported => {
+      if (supported) {
+        Linking.openURL(mapUrl);
+      } else {
+        // Fallback to web URL if the maps app isn't available
+        Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${coordinates.latitude},${coordinates.longitude}`);
+      }
+    });
+  };
+
   useEffect(() => {
+    console.log("Restaurant Data:", restaurant); // Keep the logging
+    
     const backAction = () => {
       Alert.alert("Hold on!", "Are you sure you want to exit?", [
         { text: "Cancel", onPress: () => null, style: "cancel" },
-        { text: "YES", onPress: () => BackHandler.exitApp() } // Exits app
+        { text: "YES", onPress: () => BackHandler.exitApp() },
       ]);
-      return true; // Prevent default back action
+      return true;
     };
-  
+
     BackHandler.addEventListener("hardwareBackPress", backAction);
-  
     return () => BackHandler.removeEventListener("hardwareBackPress", backAction);
   }, []);
+
   interface Restro {
     id: number;
     name: string;
-    offer: string;
     description: string;
     time: string;
     far: string;
     location: string;
     avgCost: string;
     rating: string;
-    image: {
-      [key: string]: string;
-    };
+    image: string[];
+    cuisine: string[];
+    ownerName: string;
+    email: string;
+    phone: string;
   }
 
   const [restro, setRestro] = useState<Restro>({
     id: 1001,
-    name: restaurant.name,
-    offer: "10%",
-    description:
-      restaurant.description,
-    time: "20 min",
+    name: restaurant.restaurantName || "Restaurant",
+    description: restaurant.description || "No description available",
+    time: `${restaurant.time?.open || "10:00"} - ${restaurant.time?.close || "22:00"}`,
     far: "2 km",
-    location: restaurant.address,
-    avgCost: "Rs: 2000 for four",
-    rating: restaurant.rating,
-    image: restaurant.image,
-  }); // State to store restaurant details
-  const [loading, setLoading] = useState(true); // Loading state for fetching data
-  const [error, setError] = useState<string | null>(null); // Error state
-  // const router = useRouter();
+    location: `${restaurant.location?.shopNo || ""}, ${restaurant.location?.floorNo || ""}, ${restaurant.location?.area || ""}, ${restaurant.location?.city || ""}`,
+    avgCost: "2000 for four",
+    rating: restaurant.rating || "4.0",
+    image: restaurant.image || [],
+    cuisine: restaurant.cuisine ? restaurant.cuisine.split(',') : ["Various"],
+    ownerName: restaurant.ownerName || "Owner",
+    email: restaurant.email || "email@example.com",
+    phone: restaurant.phone || "Not available",
+  });
 
-  // useEffect(() => {
-  //   // const fetchRestroData = async () => {
-  //   //   try {
-  //   //     const response = await fetch(
-  //   //       // `http://localhost:3000/api/restro/${id}`
-  //   //       // `http://192.168.1.5:3000/api/restro/${id}`
-  //   //       `http://192.168.0.177:3000/api/restro/${id}`
-  //   //     );
-  //   //     const data = await response.json();
-  //   //     if (response.ok) {
-  //   //       console.log("Fetched Data:", data); // Print the fetched data in the console
-  //   //       setRestro(data.restaurant); // Set restaurant data
-  //   //     } else {
-  //   //       setError(data.error || "Error fetching data");
-  //   //     }
-  //   //   } catch (err) {
-  //   //     console.error("Fetch Error:", err); // Log any fetch errors
-  //   //     setError("An error occurred while fetching data.");
-  //   //   } finally {
-  //   //     setLoading(false); // Set loading to false after the fetch
-  //   //   }
-  //   // };
+  const [error, setError] = useState<string | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  //   fetchRestroData();
-  // }, [id]);
+  const handleCall = () => {
+    Linking.openURL(`tel:${restro.phone}`);
+  };
 
-  // if (loading) {
-  //   return (
-  //     <View style={styles.loadingContainer}>
-  //       <ActivityIndicator size="large" color="#4CAF50" />
-  //       <Text style={styles.loadingText}>Loading restaurant details...</Text>
-  //     </View>
-  //   );
-  // }
+  const handleEmail = () => {
+    Linking.openURL(`mailto:${restro.email}`);
+  };
+
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      <LinearGradient
+        colors={['rgba(0,0,0,0.6)', 'transparent']}
+        style={styles.headerGradient}
+      >
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFF" />
+        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.headerButton}>
+            <Ionicons name="heart-outline" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </View>
+  );
 
   if (error) {
     return (
@@ -123,177 +146,484 @@ const SearchedRestro = ({ navigation, route }: any) => {
     );
   }
 
-  // Destructure data from `restro` and store in local variables
-  const { name, location, description, rating, avgCost } = restro;
+  const { name, location, description, rating, avgCost, cuisine, ownerName, email, phone } = restro;
 
   return (
-    <>
-      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
-      <View style={styles.container}>
-        {/* Header Bar */}
-        <View style={styles.header}>
-          <Header
-            icon="arrow-back-ios"
-            onPress={() => {
-              // router.push("/components/Search/Search");
-            }}
-          />
-          <Text style={styles.headerTitle}>Home</Text>
-          <Header icon="share" onPress={() => {}} />
-        </View>
-
-        {/* Scroll View containing all the content of the page */}
-        <ScrollView>
-          <View style={styles.content}>
-            {/* Image Carousel */}
+    <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      
+      <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          {/* Image Carousel with Header Overlay */}
+          <View style={styles.carouselContainer}>
             <ImageCarousel
-              imageUrls={[
-                restro.image[0],
-                restro.image[1],
-                restro.image[2],
-                restro.image[3],
-                restro.image[4],
+              imageUrls={restro.image.length > 0 ? restro.image : [
+                "https://via.placeholder.com/400x200?text=No+Image",
+                "https://via.placeholder.com/400x200?text=No+Image",
               ]}
+              onIndexChange={setActiveImageIndex}
             />
+            {renderHeader()}
+            
+            {/* Image Pagination */}
+            <View style={styles.pagination}>
+              {restro.image.length > 0 ? restro.image.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.paginationDot,
+                    activeImageIndex === index && styles.paginationDotActive
+                  ]}
+                />
+              )) : [0, 1].map((index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.paginationDot,
+                    activeImageIndex === index && styles.paginationDotActive
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
 
-            {/* Rating Bar */}
-            <Rating rating={rating} />
+          {/* Restaurant Info Card */}
+          <View style={styles.infoCard}>
+            <View style={styles.nameContainer}>
+              <Text style={styles.restaurantName}>{name}</Text>
+              <View style={styles.ratingContainer}>
+                <Text style={styles.ratingText}>{rating}</Text>
+                <Ionicons name="star" size={16} color="#FFF" />
+              </View>
+            </View>
+            
+            {/* Updated location section with map button
+            <View style={styles.locationContainer}>
+              <Text style={styles.locationText}>{location}</Text>
+              <TouchableOpacity 
+                style={styles.mapButton}
+                onPress={openInMaps}
+              >
+                <Ionicons name="map" size={22} color="#FFF" />
+              </TouchableOpacity>
+            </View> */}
 
-            {/* Pass local variables to Description */}
-            <Description
-              name={name}
-              location={location}
-              description={description}
-              avgCost={avgCost}
-              cuisine={restaurant.cuisine}
-            />
+            <View style={styles.divider} />
 
-            {/* Offers Section */}
-            <View style={styles.offersSection}>
-              <Text style={styles.sectionTitle}>Top Offers for you</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {[1, 2, 3, 4, 5].map((_, index) => (
-                  <OfferCard
-                    key={index}
-                    name={restro.name}
-                    description={restro.description}
-                    time={restro.time}
-                    distance={restro.far}
-                    offer={restro.offer}
-                    imageUrl={restro.image[`${index + 1}`]} // Dynamically load each image URL
-                  />
-                ))}
-              </ScrollView>
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Ionicons name="time-outline" size={20} color="#666" />
+                <Text style={styles.statText}>{restro.time}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <MaterialIcons name="currency-rupee" size={20} color="#666" />
+                <Text style={styles.statText}>{avgCost}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Ionicons name="location-outline" size={20} color="#666" />
+                <Text style={styles.statText}>{restro.far}</Text>
+              </View>
             </View>
 
-            {/* Regular Images
-            <Image
-              source={require("../assets/image1.jpg")}
-              style={styles.regularImage}
-            />
-            <Image
-              source={require("../assets/image2.jpg")}
-              style={styles.regularImage}
-            /> */}
+            <View style={styles.divider} />
+
+            {/* Cuisines Section */}
+            <Text style={styles.sectionTitle}>Cuisines</Text>
+            <View style={styles.cuisineContainer}>
+              {cuisine.map((item, index) => (
+                <View key={index} style={styles.cuisineTag}>
+                  <Text style={styles.cuisineTagText}>{item.trim()}</Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.divider} />
+
+            <Text style={styles.descriptionTitle}>About</Text>
+            <Text style={styles.descriptionText}>{description}</Text>
+
+            <View style={styles.divider} />
+
+            {/* Owner Details Section */}
+            <View style={styles.ownerSection}>
+              <Text style={styles.sectionTitle}>Contact Information</Text>
+              
+              <View style={styles.ownerDetail}>
+                <View style={styles.ownerInfo}>
+                  <FontAwesome name="user" size={18} color="#666" />
+                  <Text style={styles.ownerText}>
+                    <Text style={styles.ownerLabel}>Owner: </Text>
+                    {ownerName}
+                  </Text>
+                </View>
+              </View>
+              
+              <View style={styles.contactActions}>
+                <TouchableOpacity style={styles.contactButton} onPress={handleCall}>
+                  <FontAwesome name="phone" size={18} color="#FFF" />
+                  <Text style={styles.contactButtonText}>Call</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.contactButton} onPress={handleEmail}>
+                  <FontAwesome name="envelope" size={18} color="#FFF" />
+                  <Text style={styles.contactButtonText}>Email</Text>
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.contactDetails}>
+                <View style={styles.contactItem}>
+                  <FontAwesome name="phone" size={16} color="#666" />
+                  <Text style={styles.contactText}>{phone}</Text>
+                </View>
+                <View style={styles.contactItem}>
+                  <FontAwesome name="envelope" size={16} color="#666" />
+                  <Text style={styles.contactText}>{email}</Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.divider} />
+
+            {/* Location Section - Map View */}
+            <View style={styles.mapSection}>
+              <Text style={styles.sectionTitle}>Location</Text>
+              <TouchableOpacity 
+                style={styles.mapViewButton} 
+                onPress={openInMaps}
+              >
+                <View style={styles.mapButtonContent}>
+                  <Ionicons name="location" size={24} color="#FFF" />
+                  <Text style={styles.mapButtonText}>View on Google Maps</Text>
+                </View>
+                <Text style={styles.mapAddressText}>
+                  Polytechnic, Nizampura, near Shastri Bridge, Vadodara, Gujarat
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </ScrollView>
-
-        {/* Footer Section */}
-        <View style={styles.footer}>
-          <FooterButton title="Menu" id={restro.id} />
-          <FooterButton title="Book" />
         </View>
+      </ScrollView>
 
-         {/* Bottom Navigation */}
-      <NavigationBar navigation={navigation}></NavigationBar>
+      {/* Footer Buttons */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={[styles.footerButton, styles.menuButton]}
+          onPress={() => navigation.navigate("MenuItems", { restaurantId: restaurant._id })}
+        >
+          <Ionicons name="restaurant-outline" size={20} color="#FFF" />
+          <Text style={styles.footerButtonText}>View Menu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.footerButton, styles.bookButton]}
+          onPress={() => navigation.navigate("RestaurantBooking", { restaurant })}
+        >
+          <Ionicons name="calendar-outline" size={20} color="#FFF" />
+          <Text style={styles.footerButtonText}>Book Table</Text>
+        </TouchableOpacity>
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#4CAF50",
-    fontWeight: "bold",
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
-    textAlign: "center",
-  },
-  header: {
-    height: screenHeight * 0.065,
-    borderBottomWidth: 0.3,
-    borderBottomColor: "grey",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 10,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 10,
-    right: screenWidth * 0.34,
+    backgroundColor: "#F8F8F8",
   },
   content: {
     flexGrow: 1,
-    paddingVertical: 10,
-    alignItems: "center",
+  },
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  headerGradient: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 50 : 40,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  carouselContainer: {
+    height: screenHeight * 0.4,
+    position: 'relative',
+  },
+  pagination: {
+    position: 'absolute',
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  paginationDotActive: {
+    backgroundColor: '#FFF',
+    width: 24,
+  },
+  infoCard: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
+    padding: 20,
+    flex: 1,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  restaurantName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     gap: 4,
   },
-  regularImage: {
-    width: screenWidth * 0.98,
-    height: screenHeight * 0.25,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#000",
+  ratingText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
-  offersSection: {
-    height: screenHeight * 0.2,
-    width: screenWidth * 0.98,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#000",
-    overflow: "hidden",
+  cuisineText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 4,
+  },
+  // Updated location styles
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  locationText: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+    marginRight: 10,
+  },
+  mapButton: {
+    backgroundColor: '#4CAF50',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginVertical: 16,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: 16,
+    gap: 24,
+    flexWrap: 'wrap',
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  descriptionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#1A1A1A',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 22,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
-    marginLeft: 10,
-    marginTop: 3,
-  },
-  offerCard: {
-    width: screenWidth * 0.7,
-    height: screenHeight * 0.085,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#000",
-    marginHorizontal: 5,
-    marginTop: 10,
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+    color: '#1A1A1A',
   },
   footer: {
-    height: screenHeight * 0.07,
-    borderTopWidth: 0.3,
-    borderTopColor: "grey",
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 8,
+    flexDirection: 'row',
+    padding: 16,
+    backgroundColor: '#FFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    gap: 12,
+  },
+  footerButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  menuButton: {
+    backgroundColor: '#FF4B3A',
+  },
+  bookButton: {
+    backgroundColor: '#4CAF50',
+  },
+  footerButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  // New styles for cuisines
+  cuisineContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  cuisineTag: {
+    backgroundColor: '#F0F0F0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  cuisineTagText: {
+    fontSize: 14,
+    color: '#444',
+  },
+  // New styles for owner section
+  ownerSection: {
+    marginTop: 8,
+  },
+  ownerDetail: {
+    marginBottom: 16,
+  },
+  ownerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  ownerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  ownerLabel: {
+    fontWeight: '600',
+  },
+  contactActions: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+  },
+  contactButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 8,
+  },
+  contactButtonText: {
+    color: '#FFF',
+    fontWeight: '600',
+  },
+  contactDetails: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    padding: 16,
+  },
+  contactItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  contactText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  // New map section styles
+  mapSection: {
+    marginTop: 24,
+  },
+  mapViewButton: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  mapButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    padding: 16,
+    gap: 12,
+  },
+  mapButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFF',
+  },
+  mapAddressText: {
+    padding: 16,
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
   },
 });
 

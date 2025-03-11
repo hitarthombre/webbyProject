@@ -1,24 +1,59 @@
 import { create } from "zustand";
 
+interface Location {
+  latitude: number;
+  longitude: number;
+}
+
 interface User {
+  _id: {
+    $oid: string;
+  };
+  name: string;
   email: string;
   idToken: string;
-  name?: string;
-  photoUrl?: string;
+  photoUrl: string;
+  address: string;
+  phoneNumber: string;
+  location: Location;
+  __v: number;
 }
 
 interface UserState {
-  user: User ;
+  user: User;
   setUser: (user: User) => void;
   getUser: () => User;
   clearUser: () => void;
 }
 
 const userStore = create<UserState>((set, get) => ({
-  user: { email: "", idToken: "", name: "", photoUrl: "" },
+  user: {
+    _id: { $oid: "" },
+    name: "",
+    email: "",
+    idToken: "",
+    photoUrl: "",
+    address: "",
+    phoneNumber: "",
+    location: { latitude: 0, longitude: 0 },
+    __v: 0,
+  },
   setUser: (user) => set({ user }),
   getUser: () => get().user,
-  clearUser: () => set({ user: { email: "", idToken: "", name: "", photoUrl: "" } }),
+  clearUser: () =>
+    set({
+      user: {
+        _id: { $oid: "" },
+        name: "",
+        email: "",
+        idToken: "",
+        photoUrl: "",
+        address: "",
+        phoneNumber: "",
+        location: { latitude: 0, longitude: 0 },
+        __v: 0,
+      },
+    }),
 }));
 
 export default userStore;
