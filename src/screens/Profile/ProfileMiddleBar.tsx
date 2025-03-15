@@ -9,40 +9,51 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Importing icons from expo
+import { useNavigation } from "@react-navigation/native";
 // import { useRouter } from "expo-router"; // Importing useRouter for routing
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
-
-const ProfileMiddleBar = ({user}:any) => {
+interface UserProps {
+  name: string;
+  email: string;
+  photoUrl?: string;
+  address?: string;
+  phoneNumber?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+const ProfileMiddleBar = () => {
   // Dictionary to store data with title, icon name, id, color, and path
   const dataDict = {
     1: {
       id: "1",
       title: "Favorite Restaurants",
       iconName: "heart",
-      color: "#FF6347",
+      color: "#FFFFFF",
       path: "/components/FavoriteRestaurants/FavoriteRestaurants",
     },
     2: {
       id: "2",
       title: "Your Bookings",
       iconName: "calendar",
-      color: "#FFA500",
+      color: "#FFFFFF",
       path: "/components/YourBookings/YourBookings",
     },
     3: {
       id: "3",
       title: "History",
       iconName: "time",
-      color: "#4682B4",
+      color: "#FFFFFF",
       path: "/components/History/History",
     },
     4: {
       id: "4",
       title: "About",
       iconName: "alert",
-      color: "#32CD32",
+      color: "#FFFFFF",
       path: "/components/About/About",
     },
   };
@@ -60,10 +71,12 @@ const ProfileMiddleBar = ({user}:any) => {
   const backgroundColor = isDarkMode ? "#333" : "#FFF";
 
   // const router = useRouter(); // Initialize useRouter
-
+const navigation = useNavigation();
   // Function to handle navigation when an item is clicked
   const handleItemPress = (path: string) => {
     // router.push(path); // Navigates to the given path
+    navigation.navigate("bookings");
+    
   };
 
   // Convert dictionary to an array for FlatList
@@ -87,21 +100,24 @@ const ProfileMiddleBar = ({user}:any) => {
             <View
               style={[
                 styles.item,
-                { backgroundColor: item.color }, // Apply color dynamically
+                { backgroundColor: item.color, 
+                  // borderBottomWidth: 1,
+                  // borderColor: "#bababa"
+                 }, // Apply color dynamically
               ]}>
               <Ionicons
                 name={item.iconName}
-                size={25}
-                color="#FFF" // Icon color
+                size={20}
+                color="#4a4a4a" // Icon color
                 style={styles.leftIcon}
               />
-              <Text style={[styles.itemText, { color: "#FFF" }]}>
+              <Text style={[styles.itemText, { color: "#4a4a4a" }]}>
                 {item.title}
               </Text>
               <Ionicons
                 name="chevron-forward-outline"
-                size={20}
-                color="#FFF" // Icon color
+                size={15}
+                color="#4a4a4a" // Icon color
                 style={styles.rightIcon}
               />
             </View>
@@ -122,20 +138,20 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
+    padding: 10,
     marginTop: 10,
     marginBottom: 8,
-    borderRadius: 12,
+    // borderRadius: 12,
     justifyContent: "space-between",
-    shadowColor: "#121212",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 1,
-    elevation: 10,
+    // shadowColor: "#121212",
+    // shadowOffset: { width: 2, height: 2 },
+    // shadowOpacity: 1,
+    // shadowRadius: 1,
+    // elevation: 10,
   },
   itemText: {
     flex: 1,
-    fontSize: 22,
+    fontSize: 18,
     marginLeft: 10,
   },
   leftIcon: {

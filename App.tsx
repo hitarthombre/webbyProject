@@ -15,7 +15,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 // import { Immersive } from 'react-native-immersive'
 const App = () => {
   useEffect(() => {``
-    // SystemNavigationBar.navigationHide();
+    SystemNavigationBar.navigationHide();
     configureGoogleSignIn();
     // Clean up immersive mode on component unmount
 
@@ -23,7 +23,7 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" hidden/>
       <ApplicationProvider {...eva} theme={eva.light}>
         <NavigationContainer>
           <AppNavigator />

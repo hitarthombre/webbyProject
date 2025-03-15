@@ -40,7 +40,7 @@ const RestroCard = ({
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
-        const response = await axios.get(`http://192.168.19.37:3000/api/restaurants/getOne/${restaurantId}`);
+        const response = await axios.get(`${API_BASE_URL}/api/restaurants/getOne/${restaurantId}`);
         setRestaurant(response.data);
       } catch (error) {
         // console.error("Error fetching restaurant data: ", error);

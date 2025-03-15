@@ -16,7 +16,10 @@ import SearchModal from "./SearchModal";
 import API_BASE_URL from "../../../config";
 import NavigationBar from "../../components/NavigationBar";
 import FilterModal from "../../components/FilterModal";
-
+import {
+  SafeAreaInsetsContext,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // Filter options data
@@ -53,6 +56,153 @@ interface Restaurant {
 }
 
 const Search = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
+
+  const styles = StyleSheet.create({
+    container: {
+      paddingTop: insets.top,
+      flex: 1,
+      backgroundColor: "#F8F8F8",
+    },
+    searchBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#FFF",
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      margin: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    searchPlaceholder: {
+      color: "#666",
+      marginLeft: 12,
+      fontSize: 16,
+    },
+    filterSection: {
+      marginBottom: 16,
+    },
+    filterList: {
+      paddingHorizontal: 16,
+      gap: 8,
+    },
+    filterChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#FFF",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      marginRight: 8,
+      borderWidth: 1,
+      borderColor: "#E0E0E0",
+    },
+    filterChipSelected: {
+      backgroundColor: "#FF4B3A",
+      borderColor: "#FF4B3A",
+    },
+    filterText: {
+      fontSize: 14,
+      color: "#666",
+      marginLeft: 6,
+    },
+    filterTextSelected: {
+      color: "#FFF",
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      marginHorizontal: 16,
+      marginBottom: 16,
+      color: "#1A1A1A",
+    },
+    restaurantList: {
+      paddingHorizontal: 16,
+      gap: 16,
+    },
+    restaurantCard: {
+      backgroundColor: "#FFF",
+      borderRadius: 16,
+      overflow: "hidden",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    restaurantImage: {
+      width: "100%",
+      height: 200,
+      backgroundColor: "#F0F0F0",
+    },
+    restaurantContent: {
+      padding: 16,
+    },
+    restaurantHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    restaurantName: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: "#1A1A1A",
+    },
+    ratingContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "#4CAF50",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    ratingText: {
+      color: "#FFF",
+      marginLeft: 4,
+      fontWeight: "600",
+    },
+    cuisineText: {
+      fontSize: 14,
+      color: "#666",
+      marginBottom: 4,
+    },
+    restaurantDesc: {
+      fontSize: 14,
+      color: "#666",
+      lineHeight: 20,
+    },
+    restaurantFooter: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 12,
+    },
+    timeContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    timeText: {
+      fontSize: 14,
+      color: "#666",
+      marginLeft: 4,
+    },
+    promotedTag: {
+      backgroundColor: "#FF4B3A",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 4,
+    },
+    promotedText: {
+      color: "#FFF",
+      fontSize: 12,
+      fontWeight: "500",
+    },
+  });
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Restaurant[]>([]);
@@ -62,9 +212,7 @@ const Search = ({ navigation }: any) => {
   >([]);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-
-
-  // filter modal section 
+  // filter modal section
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const handleOpenFilter = () => {
@@ -83,8 +231,6 @@ const Search = ({ navigation }: any) => {
   const handleClearFilters = () => {
     // Handle clearing filters here
   };
-
-
 
   const scrollY = new Animated.Value(0);
 
@@ -149,9 +295,9 @@ const Search = ({ navigation }: any) => {
         selectedFilters.includes(item.id) && styles.filterChipSelected,
       ]}
       onPress={() => {
-        toggleFilter(item.id)
-        if(item.label === "Filter"){
-          handleOpenFilter()
+        toggleFilter(item.id);
+        if (item.label === "Filter") {
+          handleOpenFilter();
         }
       }}
     >
@@ -172,7 +318,6 @@ const Search = ({ navigation }: any) => {
   );
 
   const renderRestaurantItem = ({ item }: { item: Restaurant }) => (
-    
     <TouchableOpacity
       style={styles.restaurantCard}
       onPress={() => handleSuggestionPress(item)}
@@ -278,150 +423,5 @@ const Search = ({ navigation }: any) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    margin: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  searchPlaceholder: {
-    color: "#666",
-    marginLeft: 12,
-    fontSize: 16,
-  },
-  filterSection: {
-    marginBottom: 16,
-  },
-  filterList: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-  filterChipSelected: {
-    backgroundColor: "#FF4B3A",
-    borderColor: "#FF4B3A",
-  },
-  filterText: {
-    fontSize: 14,
-    color: "#666",
-    marginLeft: 6,
-  },
-  filterTextSelected: {
-    color: "#FFF",
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginHorizontal: 16,
-    marginBottom: 16,
-    color: "#1A1A1A",
-  },
-  restaurantList: {
-    paddingHorizontal: 16,
-    gap: 16,
-  },
-  restaurantCard: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  restaurantImage: {
-    width: "100%",
-    height: 200,
-    backgroundColor: "#F0F0F0",
-  },
-  restaurantContent: {
-    padding: 16,
-  },
-  restaurantHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  restaurantName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1A1A1A",
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  ratingText: {
-    color: "#FFF",
-    marginLeft: 4,
-    fontWeight: "600",
-  },
-  cuisineText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
-  },
-  restaurantDesc: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-  },
-  restaurantFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  timeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  timeText: {
-    fontSize: 14,
-    color: "#666",
-    marginLeft: 4,
-  },
-  promotedTag: {
-    backgroundColor: "#FF4B3A",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  promotedText: {
-    color: "#FFF",
-    fontSize: 12,
-    fontWeight: "500",
-  },
-});
 
 export default Search;

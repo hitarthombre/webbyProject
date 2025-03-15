@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Image, Pressable, Alert } from "react-native";
+import { View, Image, Alert } from "react-native";
 import { Input, Button, Text } from "@ui-kitten/components";
 import tw from "twrnc";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -13,23 +13,23 @@ import {
   validatePass,
 } from "../../utils/authHelpers";
 import axios from "axios";
-import userStore from "../../zustand/userStore";
 import API_BASE_URL from "../../../config";
-import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
+import CustomGoogleSigninButton from "../../components/CustomGoogleSigninButton ";
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
 const RegisterScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isInProgress, setIsInProgress] = useState(false);
-  const { setUser, getUser } = userStore();
+  const [otpVerified, setOtpVerified] = useState(false);
+
   const handleGetOtp = async () => {
     setIsInProgress(true);
     if (!validateEmail(email)) {
       Alert.alert("Enter valid email");
+      setIsInProgress(false);
       return;
     } else {
       try {
@@ -46,23 +46,54 @@ const RegisterScreen = ({ navigation }: Props) => {
         }
       } catch (error) {
         console.error("Error sending OTP:", error);
+        Alert.alert("Failed to send OTP", "Please try again");
       } finally {
         setIsInProgress(false);
       }
     }
   };
-  const handleRegister = async () => {
+
+  const verifyOtp = async () => {
     setIsInProgress(true);
-    // if (!validateEmail(email) || password === "") {
-    //   Alert.alert("Please fill in all fields.");
-    //   return;
-    // }
+    if (!validateOtp(otp)) {
+      Alert.alert("Invalid OTP");
+      setIsInProgress(false);
+      return false;
+    }
+
+    try {
+      // Verify OTP with the server
+      const response = await axios.post(`${API_BASE_URL}/api/auth/verify-otp`, {
+        email,
+        otp,
+      });
+
+      if (response.data.status === true) {
+        setOtpVerified(true);
+        setIsInProgress(false);
+        return true;
+      } else {
+        Alert.alert(response.data.message || "Invalid Otp, Try again");
+        setIsInProgress(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      Alert.alert("OTP Verification Failed", "Please try again");
+      setIsInProgress(false);
+      return false;
+    }
+  };
+
+  const handleContinue = async () => {
+    setIsInProgress(true);
+
     if (!validateEmail(email)) {
-      Alert.alert("Please Enter valid email");
+      Alert.alert("Please enter valid email");
       setIsInProgress(false);
       return;
     } else if (!validateOtp(otp)) {
-      Alert.alert("Invalid otp");
+      Alert.alert("Invalid OTP");
       setIsInProgress(false);
       return;
     } else if (!validatePass(password)) {
@@ -73,63 +104,41 @@ const RegisterScreen = ({ navigation }: Props) => {
       Alert.alert("Passwords do not match!");
       setIsInProgress(false);
       return;
-    } else {
-      try {
-        setIsInProgress(true);
-        // Implement your registration API call here
-        // await api.post('/auth/register', { email, password });
-        const user = { email, password, otp, photoUrl: "", name: username };
-        const response = await axios.post(
-          `${API_BASE_URL}/api/users/registerbyemail`,
-          user
-        );
-        if (response.data.status === false) {
-          Alert.alert(response.data.message);
-          setIsInProgress(false);
-          return;
-        } else {
-          alert("Registration successful!");
-          setIsInProgress(false);
-          setUser(response.data.user);
-          navigation.replace("Home");
-        }
-      } catch (error) {
-        alert("Registration failed. Please try again.");
-      } finally {
-        setIsInProgress(false);
+    }
+
+    // Verify OTP if not already verified
+    if (!otpVerified) {
+      const isVerified = await verifyOtp();
+      if (!isVerified) {
+        return;
       }
     }
+
+    // Navigate to UserDetails screen with email and password
+    navigation.navigate("UserDetails", {
+      email,
+      password
+    });
+
+    setIsInProgress(false);
   };
+
   const handleGoogleSignIn = async () => {
     setIsInProgress(true);
     try {
       const userInfo = await signUpWithGoogle();
       if (userInfo.type === "success") {
-        const user = {
-          idToken: userInfo.data?.idToken,
+        // Just navigate to UserDetails with Google user info
+        navigation.navigate("UserDetails", {
           email: userInfo.data?.user.email,
-          name: userInfo.data?.user.name,
           photoUrl: userInfo.data?.user.photo,
-        };
-        const response = await axios.post(
-          `${API_BASE_URL}/api/users/register`,
-          user
-        );
-
-        if (response.data.status === false) {
-          Alert.alert("Sign-Up Failed", "User already exists.");
-          signOutFromGoogle();
-        } else if (response.status === 201) {
-          Alert.alert("Sign-Up Successful", `Welcome ${user.name}!`);
-          setUser(response.data.user);
-          console.log(getUser());
-          response.status === 201 && navigation.navigate("Home");
-        }
+          googleIdToken: userInfo.data?.idToken,
+          isGoogleSignIn: true,
+        });
       }
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       Alert.alert("Sign-In Failed", "Please try again.");
-      setIsInProgress(false);
       signOutFromGoogle();
     } finally {
       setIsInProgress(false);
@@ -141,7 +150,7 @@ const RegisterScreen = ({ navigation }: Props) => {
       <Image
         source={require("../../../assets/images/auth_icon.png")}
         style={tw`w-full h-30 mb-8`}
-      ></Image>
+      />
       <Text style={tw`text-3xl mb-8 text-center font-bold`}>SIGNUP</Text>
 
       <Input
@@ -155,7 +164,7 @@ const RegisterScreen = ({ navigation }: Props) => {
       />
 
       <View style={tw`w-full`}>
-        <View style={tw`flex-row justify-between pl-6 pr-6 pb-4 `}>
+        <View style={tw`flex-row justify-between pl-6 pr-6 pb-4`}>
           <Input
             placeholder="OTP"
             value={otp}
@@ -165,7 +174,11 @@ const RegisterScreen = ({ navigation }: Props) => {
             textStyle={tw`p-2`}
             keyboardType="number-pad"
           />
-          <Button style={tw`border-0 bg-yellow-500`} onPress={handleGetOtp}>
+          <Button
+            style={[tw`border-0`, { backgroundColor: colors.primary }]}
+            onPress={handleGetOtp}
+            disabled={isInProgress}
+          >
             Get OTP
           </Button>
         </View>
@@ -191,39 +204,23 @@ const RegisterScreen = ({ navigation }: Props) => {
 
       <View style={tw`w-full`}>
         <Button
-          onPress={handleRegister}
+          onPress={handleContinue}
           disabled={isInProgress}
           style={[tw`mb-4 ml-6 mr-6`, { backgroundColor: colors.primary }]}
         >
-          {isInProgress ? "Creating Account..." : "Register"}
+          {isInProgress ? "Processing..." : "Continue"}
         </Button>
       </View>
+
+      <CustomGoogleSigninButton
+        colors={colors}
+        handleGoogleSignIn={handleGoogleSignIn}
+        isInProgress={isInProgress}
+      />
 
       <Button appearance="ghost" onPress={() => navigation.navigate("Login")}>
         Already have an account? Login
       </Button>
-      {/* google login */}
-      {/* <Pressable
-        style={tw`flex-row justify-center items-center mt-4`}
-        onPress={handleGoogleSignIn}
-      >
-        <View style={tw`flex-row justify-center items-center mt-4`}>
-          <View style={tw`w-10 h-10 rounded-full`}>
-            <Image
-              source={require("../../../assets/images/google_icon.png")}
-              style={tw`w-full h-full`}
-            ></Image>
-          </View>
-        </View>
-      </Pressable> */}
-      <View style={tw`w-full flex-row justify-center`}>
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={handleGoogleSignIn}
-          disabled={isInProgress}
-        />
-      </View>
     </View>
   );
 };

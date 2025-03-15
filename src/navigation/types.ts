@@ -1,16 +1,16 @@
 export type RootStackParamList = {
   Login: undefined;
+  UserDetails: undefined;
   Register: undefined;
+  MenuItems: undefined;
   Home: undefined;
   RegisterRestaurant: undefined;
-  RestaurantPage: undefined;
   Search: undefined;
   Profile: undefined;
   Product: undefined;
-  MenuItems: undefined;
-  RestaurantHomePage: undefined;
   FooterButton: undefined;
+  RestaurantHomePage: undefined;
   RestaurantBooking: undefined;
   categories: undefined;
-  restroCard: undefined;
+  bookings: undefined;
 }; 

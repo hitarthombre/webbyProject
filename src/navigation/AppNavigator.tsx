@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from "./types";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
@@ -12,8 +12,11 @@ import SearchedRestro from "../screens/restaurant/RestaurantHomePage";
 import RestaurantBooking from "../screens/restaurant/RestaurantBooking";
 import CategoryScreen from "../screens/restaurant/CategoryScreen";
 import MenuScreen from "../screens/restaurant/MenuScreen";
+import Demo from "../screens/Demo";
+import BookingsScreen from "../screens/restaurant/BookingScreen";
+import UserDetailsScreen from '../screens/auth/UserDetailsScreen';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   return (
@@ -21,7 +24,6 @@ const AppNavigator = () => {
       initialRouteName="Login"
       screenOptions={{
         headerShown: true,
-        headerBackTitle: "Back",
       }}
     >
       <Stack.Screen
@@ -29,7 +31,12 @@ const AppNavigator = () => {
         component={LoginScreen}
         options={{ headerShown: false }}
       />
-      
+      <Stack.Screen
+        name="UserDetails"
+        component={UserDetailsScreen}
+        options={{ headerShown: false }}
+      />
+
       <Stack.Screen
         name="Register"
         component={RegisterScreen}
@@ -65,7 +72,7 @@ const AppNavigator = () => {
         component={Product}
         options={{ headerShown: false }}
       />
-     
+
       <Stack.Screen
         name="FooterButton"
         component={FooterButton}
@@ -74,17 +81,21 @@ const AppNavigator = () => {
       <Stack.Screen
         name="RestaurantHomePage"
         component={SearchedRestro}
-        options={{ headerShown: false , title: "Restaurant" }}
+        options={{ headerShown: false, title: "Restaurant" }}
       />
       <Stack.Screen
         name="RestaurantBooking"
         component={RestaurantBooking}
         options={{ headerShown: false, title: "Restaurant Booking" }}
-        
       />
       <Stack.Screen
         name="categories"
         component={CategoryScreen}
+        options={{ headerShown: false, title: "Restaurant Booking" }}
+      />
+      <Stack.Screen
+        name="bookings"
+        component={BookingsScreen}
         options={{ headerShown: false, title: "Restaurant Booking" }}
       />
     </Stack.Navigator>

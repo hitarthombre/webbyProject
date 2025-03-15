@@ -231,7 +231,8 @@ const RestaurantBooking = ({ route }: any) => {
       );
   
       Alert.alert("Booking Successful", "Your booking has been confirmed.");
-      navigation.navigate("Home");
+      // navigation.preload("Home");
+      navigation.goBack();
     } catch (error) {
       console.error("Booking error:", error);
   
@@ -373,11 +374,11 @@ const RestaurantBooking = ({ route }: any) => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      paddingTop: insets.top,
     },
     container: {
       flex: 1,
       backgroundColor: "#fff",
+      paddingTop: insets.top,
       // marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   
     },
@@ -602,7 +603,7 @@ const RestaurantBooking = ({ route }: any) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() =>
-            navigation.navigate("RestaurantHomePage", { restaurant })
+            navigation.goBack()
           }
         >
           <Ionicons name="arrow-back" size={24} color="#000" />

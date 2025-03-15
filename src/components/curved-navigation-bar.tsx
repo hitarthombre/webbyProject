@@ -7,23 +7,31 @@ import {
   Animated,
   ScrollView,
 } from "react-native";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { CommonActions, useFocusEffect } from "@react-navigation/native";
 
 const WINDOW_WIDTH = Dimensions.get("window").width;
 
-const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Animated.Value }) => {
+const NavigationBar = ({
+  navigation,
+  scrollY,
+}: {
+  navigation: any;
+  scrollY?: Animated.Value;
+}) => {
+
   // Create local animated value if not provided
   const localScrollY = useRef(new Animated.Value(0)).current;
   const effectiveScrollY = scrollY || localScrollY;
-  
+
   // Animation for visibility
   const translateY = effectiveScrollY.interpolate({
     inputRange: [-50, 0, 100],
     outputRange: [0, 0, 20],
-    extrapolate: 'clamp'
+    extrapolate: "clamp",
   });
-  
+
   // Get current route for active state
   const currentRoute =
     navigation.getState().routes[navigation.getState().index].name;
@@ -37,12 +45,7 @@ const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Ani
   const isActive = (screen: string) => currentRoute === screen;
 
   return (
-    <Animated.View 
-      style={[
-        styles.container,
-        { transform: [{ translateY }] }
-      ]}
-    >
+    <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
       <View style={styles.barBackground}>
         <View style={styles.tabBar}>
           {/* =============== Home Tab =============== */}
@@ -56,7 +59,11 @@ const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Ani
                 size={24}
                 color={isActive("Home") ? "#3b82f6" : "#6b7280"}
               />
-              <Text style={[styles.tabText, isActive("Home") && styles.activeText]}>Home</Text>
+              <Text
+                style={[styles.tabText, isActive("Home") && styles.activeText]}
+              >
+                Home
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -71,7 +78,14 @@ const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Ani
                 size={24}
                 color={isActive("Search") ? "#3b82f6" : "#6b7280"}
               />
-              <Text style={[styles.tabText, isActive("Search") && styles.activeText]}>Search</Text>
+              <Text
+                style={[
+                  styles.tabText,
+                  isActive("Search") && styles.activeText,
+                ]}
+              >
+                Search
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -86,7 +100,14 @@ const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Ani
                 size={24}
                 color={isActive("Profile") ? "#3b82f6" : "#6b7280"}
               />
-              <Text style={[styles.tabText, isActive("Profile") && styles.activeText]}>Profile</Text>
+              <Text
+                style={[
+                  styles.tabText,
+                  isActive("Profile") && styles.activeText,
+                ]}
+              >
+                Profile
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -96,10 +117,12 @@ const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Ani
 };
 
 // HOC to use with scroll views
-export const withNavigationBar = (WrappedComponent: React.ComponentType<any>) => {
+export const withNavigationBar = (
+  WrappedComponent: React.ComponentType<any>
+) => {
   return (props: any) => {
     const scrollY = useRef(new Animated.Value(0)).current;
-    
+
     return (
       <View style={{ flex: 1 }}>
         <Animated.ScrollView

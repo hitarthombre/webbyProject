@@ -13,6 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 const WINDOW_WIDTH = Dimensions.get("window").width;
 
 const NavigationBar = ({ navigation, scrollY }: { navigation: any; scrollY?: Animated.Value }) => {
+
+  
   // Create local animated value if not provided
   const localScrollY = useRef(new Animated.Value(0)).current;
   const effectiveScrollY = scrollY || localScrollY;

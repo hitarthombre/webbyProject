@@ -10,38 +10,48 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Use } from "react-native-svg";
 
 // Get the screen width and height
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const ProfileTopBar = ({user}:any) => {
+// Define the user prop type
+interface UserProps {
+  name: string;
+  email: string;
+  photoUrl?: string;
+  address?: string;
+  phoneNumber?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+const ProfileTopBar = ({ user }: any) => {
   const systemTheme = useColorScheme();
   const [theme, setTheme] = useState(systemTheme);
-
+  
   useEffect(() => {
-    console.log("hello"+user.name);
     setTheme(systemTheme);
   }, [systemTheme]);
-
+  
   // const isDarkMode = theme === "dark";
-  const isDarkMode = false
+  const isDarkMode = false;
   const textColor = isDarkMode ? "#FFF" : "#000";
   const backgroundColor = isDarkMode ? "#333" : "#FFF";
   const redColor = isDarkMode ? "#FF6347" : "red";
   const profilePicBorderColor = isDarkMode ? "#FFF" : "#121212";
-
+  
+  // Extract first name for display if needed
+  const firstName = user?.name ? user.name.split(' ')[0] : '';
+  
   return (
     <View
       style={[
         styles.container,
         { backgroundColor: isDarkMode ? "#121212" : "#FFF" },
       ]}>
-      {/* <StatusBar
-        barStyle={isDarkMode ? "light-content" : "dark-content"}
-        backgroundColor={isDarkMode ? "#121212" : "#FFF"}
-      /> */}
       <View
         style={[
           styles.bottombar,
@@ -50,30 +60,26 @@ const ProfileTopBar = ({user}:any) => {
         {/* Text Section */}
         <View style={styles.textSection}>
           <Text style={[styles.profileName, { color: textColor }]}>
-            {user.name}
+            {user?.name || "User Name"}
           </Text>
           <Text style={[styles.profileEmail, { color: textColor }]}>
-            {user.email}
+            {user?.email || "user@example.com"}
           </Text>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Text style={[styles.profileViewActivity, { color: redColor }]}>
-              View Activity
-              <Ionicons
-                name="arrow-forward"
-                size={10}
-                color={redColor}
-                style={styles.arrowIcon}
-              />
-            </Text>
-          </TouchableOpacity>
         </View>
-
+        
         {/* Profile Image Section */}
         <View style={styles.imageSection}>
-          <Image
-            source={require("../../../assets/images/profilePic.jpg")}
-            style={[styles.profilePic, { borderColor: profilePicBorderColor }]}
-          />
+          {user?.photoUrl ? (
+            <Image
+              source={{ uri: user.photoUrl }}
+              style={[styles.profilePic, { borderColor: profilePicBorderColor }]}
+            />
+          ) : (
+            <Image
+              source={require("../../../assets/images/profilePic.jpg")}
+              style={[styles.profilePic, { borderColor: profilePicBorderColor }]}
+            />
+          )}
         </View>
       </View>
     </View>
@@ -87,24 +93,20 @@ const styles = StyleSheet.create({
     borderRadius: screenWidth * 0.25,
     borderWidth: 1,
   },
-
   backArrow: {
     position: "absolute",
     left: 20,
     top: screenHeight * 0.01,
   },
-
   container: {
     // flex: 1,
     // justifyContent: "space-between",
   },
-
   topbar: {
     width: screenWidth,
     height: screenHeight * 0.05,
     justifyContent: "center",
   },
-
   bottombar: {
     width: screenWidth,
     height: screenHeight * 0.13,
@@ -115,16 +117,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, // Add some horizontal padding to avoid items touching edges
     marginBottom: 15,
   },
-
   textSection: {
     flex: 1, // Take up available space for text
     justifyContent: "center", // Center text vertically
   },
-
   imageSection: {
     justifyContent: "center", // Center the image vertically
   },
-
   profileName: {
     fontSize: 28,
     fontWeight: "bold",
@@ -137,7 +136,6 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginLeft: 10,
   },
-
   profileEmail: {
     fontSize: 16,
     textAlign: "left",
@@ -148,8 +146,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 10,
   },
-
   profileViewActivity: {
+    color: "#ff5050",
     opacity: 0.7,
     fontSize: 16,
     textAlign: "left",
@@ -161,7 +159,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-
   arrowIcon: {
     marginLeft: 5,
   },
