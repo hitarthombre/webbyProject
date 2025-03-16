@@ -80,7 +80,7 @@ const navigation = useNavigation();
       navigation.navigate("favourite");
       break;
       case "Your Bookings":
-      navigation.navigate("bookings");
+      navigation.navigate("bookedScreen");
       break;
       case "History":
       navigation.navigate("Home");

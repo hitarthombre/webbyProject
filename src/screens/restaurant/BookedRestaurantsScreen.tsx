@@ -7,11 +7,13 @@ import {
   Platform,
   ActivityIndicator,
   Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import RestroCard from "../../components/RestroCard";
 import API_BASE_URL from "../../../config";
 import userStore from "../../zustand/userStore";
 
@@ -27,16 +29,13 @@ export default function BookedRestaurantsScreen() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const pUser = getUser(); // Get user details
-        const response = await axios.post(
-          `${API_BASE_URL}/api/bookings/fetchUserBookings`,
-          {
-            userId: pUser?._id,
-          }
+        const pUser = getUser();
+        const response = await axios.get(
+          `${API_BASE_URL}/api/userbookings/67d542296b483a573835d488`
         );
-        setBookedRestaurants(response.data.bookedRestaurants);
+        setBookedRestaurants(response.data);
       } catch (err) {
-        setError("Failed to load booked restaurants. " + err);
+        setError("Failed to load booked restaurants. " + err.message);
       } finally {
         setLoading(false);
       }
@@ -45,52 +44,101 @@ export default function BookedRestaurantsScreen() {
     fetchBookings();
   }, []);
 
-  // Filter restaurants based on search query
-  const filteredRestaurants = bookedRestaurants.filter(
-    (booking) =>
-      booking.restaurant.restaurantName
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      booking.restaurant.cuisine.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRestaurants = bookedRestaurants.filter((booking) =>
+    booking.restaurantId.restaurantName
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
-  // Header animation
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [
-      Platform.OS === "ios" ? 120 : 100,
-      Platform.OS === "ios" ? 80 : 60,
-    ],
-    extrapolate: "clamp",
-  });
+  const formatDate = (dateString) => {
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
 
-  const searchBarOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0.8],
-    extrapolate: "clamp",
-  });
+  const renderRestaurantCard = (booking) => {
+    return (
+      <TouchableOpacity 
+        key={booking._id} 
+        style={styles.bookingCard}
+        activeOpacity={0.9}
+      >
+        {/* Restaurant Image */}
+        <Image
+          source={{ 
+            uri: booking.restaurantId.image[0] || "https://via.placeholder.com/150" 
+          }}
+          style={styles.restaurantImage}
+          resizeMode="cover"
+        />
+        
+        {/* Restaurant Details */}
+        <View style={styles.detailsContainer}>
+          <View style={styles.headerRow}>
+            <Text style={styles.restaurantName} numberOfLines={1}>
+              {booking.restaurantId.restaurantName}
+            </Text>
+          </View>
+          
+          <Text style={styles.cuisineText} numberOfLines={1}>
+            {booking.restaurantId.cuisine}
+          </Text>
+          
+          {/* Booking Details */}
+          <View style={styles.bookingDetailsContainer}>
+            <View style={styles.bookingDetail}>
+              <Ionicons name="calendar-outline" size={16} color="#667eea" />
+              <Text style={styles.bookingDetailText}>
+                {formatDate(booking.selectedDate)}
+              </Text>
+            </View>
+            
+            <View style={styles.bookingDetail}>
+              <Ionicons name="time-outline" size={16} color="#667eea" />
+              <Text style={styles.bookingDetailText}>
+                {booking.selectedTimeSlot}
+              </Text>
+            </View>
+            
+            <View style={styles.bookingDetail}>
+              <Ionicons name="people-outline" size={16} color="#667eea" />
+              <Text style={styles.bookingDetailText}>
+                {booking.membersCount} {booking.membersCount === 1 ? 'Guest' : 'Guests'}
+              </Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Options Button */}
+        <TouchableOpacity style={styles.optionsButton}>
+          <Ionicons name="ellipsis-vertical" size={20} color="#4A5568" />
+        </TouchableOpacity>
+
+        {/* Rating Badge positioned at bottom right */}
+        <View style={styles.ratingContainer}>
+          <Ionicons name="star" size={14} color="#FFD700" />
+          <Text style={styles.ratingText}>{booking.restaurantId.rating}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <View style={[styles.container]}>
-      <Animated.View style={[styles.header, { height: headerHeight }]}>
-        <Animated.View
-          style={[styles.searchContainer, { opacity: searchBarOpacity }]}
-        >
-          <Ionicons
-            name="search"
-            size={20}
-            color="#667eea"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search bookings..."
-            placeholderTextColor="#A0AEC0"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </Animated.View>
-      </Animated.View>
+    <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <Ionicons
+          name="search"
+          size={20}
+          color="#667eea"
+          style={styles.searchIcon}
+        />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search bookings..."
+          placeholderTextColor="#A0AEC0"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
 
       {loading ? (
         <ActivityIndicator size="large" color="#667eea" style={styles.loader} />
@@ -98,45 +146,24 @@ export default function BookedRestaurantsScreen() {
         <Text style={styles.errorText}>{error}</Text>
       ) : (
         <Animated.ScrollView
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: false }
           )}
           scrollEventThrottle={16}
-          contentContainerStyle={styles.scrollContent}
         >
           {filteredRestaurants.length > 0 ? (
-            filteredRestaurants.map((booking) => (
-              <View key={booking._id} style={styles.bookingCard}>
-                <Text style={styles.bookingInfo}>
-                  Date: {new Date(booking.bookingDate).toLocaleDateString()}
-                </Text>
-                <Text style={styles.bookingInfo}>
-                  Time: {booking.bookingTime}
-                </Text>
-                <Text style={styles.bookingInfo}>
-                  Guests: {booking.numberOfGuests}
-                </Text>
-                <Text style={styles.bookingInfo}>
-                  Status: <Text style={styles.statusText}>{booking.status}</Text>
-                </Text>
-                <RestroCard
-                  image={booking.restaurant.image[0]}
-                  discount="20% OFF"
-                  name={booking.restaurant.restaurantName}
-                  cuisine={booking.restaurant.cuisine}
-                  rating={booking.restaurant.rating}
-                  time={booking.restaurant.time}
-                  description={booking.restaurant.description}
-                  restaurantId={booking.restaurant._id}
-                />
-              </View>
-            ))
+            filteredRestaurants.map(renderRestaurantCard)
           ) : (
-            <Text style={styles.noDataText}>
-              No restaurant bookings found.
-            </Text>
+            <View style={styles.emptyStateContainer}>
+              <Ionicons name="calendar-outline" size={60} color="#E2E8F0" />
+              <Text style={styles.noDataText}>No restaurant bookings found.</Text>
+              <Text style={styles.emptyStateSubText}>
+                Your upcoming reservations will appear here.
+              </Text>
+            </View>
           )}
         </Animated.ScrollView>
       )}
@@ -148,15 +175,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  header: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
-    justifyContent: "flex-end",
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-    zIndex: 100,
   },
   searchContainer: {
     flexDirection: "row",
@@ -170,6 +188,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    marginHorizontal: 20,
+    marginVertical: 15,
   },
   searchIcon: {
     marginRight: 10,
@@ -181,8 +201,8 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   scrollContent: {
-    paddingTop: 10,
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   loader: {
     flex: 1,
@@ -195,30 +215,104 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 20,
   },
-  noDataText: {
-    textAlign: "center",
-    fontSize: 16,
-    marginTop: 20,
-    color: "#A0AEC0",
-  },
   bookingCard: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 15,
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
     marginBottom: 15,
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    overflow: "hidden",
+    position: "relative",
+    height: 170, // Fixed height for more consistent appearance
+  },
+  restaurantImage: {
+    width: 100,
+    height: "100%",
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  detailsContainer: {
+    flex: 1,
+    padding: 12,
+    justifyContent: "space-between",
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  restaurantName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2D3748",
+    flex: 1,
+    marginRight: 8,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEFCBF",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 1,
   },
-  bookingInfo: {
+  ratingText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#744210",
+    marginLeft: 2,
+  },
+  cuisineText: {
     fontSize: 14,
-    marginBottom: 5,
+    color: "#718096",
+    marginBottom: 8,
+  },
+  bookingDetailsContainer: {
+    marginTop: 4,
+  },
+  bookingDetail: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  bookingDetailText: {
+    marginLeft: 8,
+    fontSize: 13,
     color: "#4A5568",
   },
-  statusText: {
+  optionsButton: {
+    padding: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyStateContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  noDataText: {
+    fontSize: 18,
     fontWeight: "600",
-    color: "#667eea",
+    marginTop: 16,
+    color: "#4A5568",
+  },
+  emptyStateSubText: {
+    fontSize: 14,
+    color: "#A0AEC0",
+    marginTop: 8,
+    textAlign: "center",
   },
 });
