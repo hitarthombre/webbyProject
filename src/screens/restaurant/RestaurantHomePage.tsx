@@ -29,16 +29,69 @@ const SearchedRestro = ({ route }: any) => {
   const navigation = useNavigation();
   const { restaurant } = route.params;
 
+  // State for distance calculation
+  const [distance, setDistance] = useState('Calculating...');
+
   // Static coordinates for Polytechnic, Nizampura, near Shastri Bridge, Vadodara, Gujarat
-  const coordinates = {
+  const restaurantCoordinates = {
     latitude: 22.3117,
     longitude: 73.1823,
   };
 
+  // Calculate distance between two coordinates in kilometers
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d.toFixed(1);
+  };
+
+  const deg2rad = (deg) => {
+    return deg * (Math.PI / 180);
+  };
+
+  // Get user's current location and calculate distance
+  useEffect(() => {
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLong = position.coords.longitude;
+            
+            const calculatedDistance = calculateDistance(
+              userLat,
+              userLong,
+              restaurantCoordinates.latitude,
+              restaurantCoordinates.longitude
+            );
+            
+            setDistance(`${calculatedDistance} km`);
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            setDistance('2 km'); // Fallback to default
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+      } else {
+        setDistance('2 km'); // Fallback if geolocation isn't available
+      }
+    };
+
+    getUserLocation();
+  }, []);
+
   const openInMaps = () => {
     const mapUrl = Platform.select({
-      ios: `maps://app?saddr=Current+Location&daddr=${coordinates.latitude},${coordinates.longitude}`,
-      android: `google.navigation:q=${coordinates.latitude},${coordinates.longitude}`,
+      ios: `maps://app?saddr=Current+Location&daddr=${restaurantCoordinates.latitude},${restaurantCoordinates.longitude}`,
+      android: `google.navigation:q=${restaurantCoordinates.latitude},${restaurantCoordinates.longitude}`,
     });
 
     Linking.canOpenURL(mapUrl).then((supported) => {
@@ -47,7 +100,7 @@ const SearchedRestro = ({ route }: any) => {
       } else {
         // Fallback to web URL if the maps app isn't available
         Linking.openURL(
-          `https://www.google.com/maps/dir/?api=1&destination=${coordinates.latitude},${coordinates.longitude}`
+          `https://www.google.com/maps/dir/?api=1&destination=${restaurantCoordinates.latitude},${restaurantCoordinates.longitude}`
         );
       }
     });
@@ -93,7 +146,7 @@ const SearchedRestro = ({ route }: any) => {
     time: `${restaurant.time?.open || "10:00"} - ${
       restaurant.time?.close || "22:00"
     }`,
-    far: "2 km",
+    far: distance, // Use the calculated distance
     location: `${restaurant.location?.shopNo || ""}, ${
       restaurant.location?.floorNo || ""
     }, ${restaurant.location?.area || ""}, ${restaurant.location?.city || ""}`,
@@ -105,6 +158,14 @@ const SearchedRestro = ({ route }: any) => {
     email: restaurant.email || "email@example.com",
     phone: restaurant.phone || "Not available",
   });
+
+  // Update restro when distance changes
+  useEffect(() => {
+    setRestro(prev => ({
+      ...prev,
+      far: distance
+    }));
+  }, [distance]);
 
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -227,17 +288,6 @@ const SearchedRestro = ({ route }: any) => {
               </View>
             </View>
 
-            {/* Updated location section with map button
-            <View style={styles.locationContainer}>
-              <Text style={styles.locationText}>{location}</Text>
-              <TouchableOpacity 
-                style={styles.mapButton}
-                onPress={openInMaps}
-              >
-                <Ionicons name="map" size={22} color="#FFF" />
-              </TouchableOpacity>
-            </View> */}
-
             <View style={styles.divider} />
 
             <View style={styles.statsContainer}>
@@ -266,11 +316,6 @@ const SearchedRestro = ({ route }: any) => {
                 </View>
               ))}
             </View>
-
-            <View style={styles.divider} />
-
-            <Text style={styles.descriptionTitle}>About</Text>
-            <Text style={styles.descriptionText}>{description}</Text>
 
             <View style={styles.divider} />
 
@@ -365,6 +410,7 @@ const SearchedRestro = ({ route }: any) => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -449,6 +495,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#1A1A1A",
+    width:"70%",
   },
   ratingContainer: {
     flexDirection: "row",

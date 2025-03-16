@@ -25,11 +25,12 @@ const ProfileButtonBar = () => {
   }, [systemTheme]);
 
   // const isDarkMode = theme === "dark";
-const isDarkMode = false
+  const isDarkMode = false;
   // const router = useRouter();
 
   const goSettings = () => {
     // router.push("/components/Settings/Settings");
+    navigation.navigate("Settings");
   };
   const goBookMark = () => {
     // router.push("/components/Bookmark/Bookmark");
@@ -46,19 +47,22 @@ const isDarkMode = false
       style={[
         styles.container,
         { backgroundColor: isDarkMode ? "#121212" : "#FFF" },
-      ]}>
+      ]}
+    >
       {/* Second Button */}
       <TouchableOpacity
         activeOpacity={0.8}
         style={styles.button}
-        onPress={goSettings}>
+        onPress={goSettings}
+      >
         <Ionicons
           name="settings-outline"
           size={30}
           color={isDarkMode ? "#FFF" : "#000"}
         />
         <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
           Settings
         </Text>
       </TouchableOpacity>
@@ -72,13 +76,20 @@ const isDarkMode = false
           onPress={goNotification}
         />
         <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
           Notifications
         </Text>
       </TouchableOpacity>
 
       {/* Fourth Button */}
-      <TouchableOpacity activeOpacity={0.8} style={styles.button}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={styles.button}
+        onPress={() => {
+          navigation.navigate("Help");
+        }}
+      >
         <MaterialIcons
           name="info-outline"
           size={30}
@@ -86,20 +97,21 @@ const isDarkMode = false
           onPress={gohelp}
         />
         <Text
-          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}>
+          style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}
+        >
           Help
         </Text>
       </TouchableOpacity>
-       {/* Sign Out Button */}
-       <TouchableOpacity
+      {/* Sign Out Button */}
+      <TouchableOpacity
         style={styles.button}
-        onPress={async() => {
+        onPress={async () => {
           await signOutFromGoogle();
           navigation.navigate("Login");
         }}
       >
         <View style={styles.signOutButton}>
-          <MaterialIcons name="logout" size={24} color="#000"/>
+          <MaterialIcons name="logout" size={24} color="#000" />
         </View>
         <Text
           style={[styles.buttonText, { color: isDarkMode ? "#FFF" : "#000" }]}

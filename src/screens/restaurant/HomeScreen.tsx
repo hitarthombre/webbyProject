@@ -23,7 +23,11 @@ import API_BASE_URL from "../../../config";
 import userStore from "../../zustand/userStore";
 import restaurantStore from "../../zustand/RestaurantStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CommonActions, useFocusEffect, useNavigation } from "@react-navigation/native";
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
 
 const RestaurantApp = () => {
   const navigation = useNavigation();
@@ -49,7 +53,9 @@ const RestaurantApp = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/homepage/getCategories`);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/homepage/getCategories`
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching categories:", error.message);
@@ -92,7 +98,9 @@ const RestaurantApp = () => {
 
       // Fetch restaurant data
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/restaurants/getRandomPromoted`);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/restaurants/getRandomPromoted`
+        );
         setRestaurantsState(response.data.results);
       } catch (error) {
         console.error("Error fetching promoted restaurants:", error.message);
@@ -118,7 +126,9 @@ const RestaurantApp = () => {
         <MaterialCommunityIcons name="map-marker" size={24} color="#FF4B3A" />
         <View>
           <Text style={styles.locationTitle}>Delivery to</Text>
-          <Text style={styles.locationText}>{user?.address || "Set your address"}</Text>
+          <Text style={styles.locationText}>
+            {user?.address || "Set your address"}
+          </Text>
         </View>
       </View>
     </View>
@@ -150,27 +160,68 @@ const RestaurantApp = () => {
 
   // Function to render each restaurant item
   const renderRestaurantItem = ({ item }: { item: any }) => (
-    <LinearGradient
-      colors={["#FF4B3A", "#FF8C8A"]}
-      style={styles.bannerContainer}
+    <View
+      style={{
+        flexDirection: 'row',
+        marginHorizontal: 20,
+        marginVertical: 10,
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+        overflow: 'hidden',
+      }}
     >
-      <Image source={{ uri: item.image[0] }} style={styles.bannerImage} />
-      <View style={styles.bannerTextContainer}>
-        <Text style={styles.bannerText}>{item.restaurantName}</Text>
-        <TouchableOpacity
-          style={styles.bookNowButton}
-          onPress={() => navigation.navigate("RestaurantHomePage", { restaurant: item })}
+      <View style={{ width: 120, height: 120, justifyContent: 'center', alignItems: 'center' }}>
+        {item.image && item.image.length > 0 ? (
+          <Image 
+            source={{ uri: item.image[0] }} 
+            style={{ width: '100%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20 }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={{ color: '#667eea' }}>image</Text>
+        )}
+      </View>
+      
+      <View style={{ flex: 1, padding: 15, justifyContent: 'center' }}>
+        <Text 
+          style={{ 
+            fontSize: 18, 
+            fontWeight: '500',
+            color: '#333',
+            marginBottom: 15,
+          }} 
+          numberOfLines={1}
         >
-          <Text style={styles.bookNowText}>Book Now</Text>
+          {item.restaurantName}
+        </Text>
+        
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#667eea',
+            borderRadius: 10,
+            paddingVertical: 8,
+            paddingHorizontal: 15,
+            alignSelf: 'flex-start',
+          }}
+          onPress={() =>
+            navigation.navigate("RestaurantHomePage", { restaurant: item })
+          }
+        >
+          <Text style={{ color: '#fff', fontWeight: '500' }}>Book now</Text>
         </TouchableOpacity>
       </View>
-    </LinearGradient>
+    </View>
   );
-
   const styles = StyleSheet.create({
+  
     container: {
       flex: 1,
-      backgroundColor: "#F8F8F8",
+      backgroundColor: "#FFF",
       paddingTop: insets.top,
     },
     header: {
@@ -301,8 +352,15 @@ const RestaurantApp = () => {
       marginRight: 10,
       borderRadius: 8,
       overflow: "hidden",
-      elevation: 2,
+      borderWidth: 1, // Set border thickness
+      borderColor: "lightgrey", // Use theme color or any color you prefer
+      backgroundColor: "#FFFFFF", // Keep the primary section white
+      shadowColor: "#000", // Optional: Adds a slight shadow
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 5, // Shadow effect for Android
     },
+    
     bannerImage: {
       // marginLeft: ,
       width: "35%",
@@ -312,14 +370,16 @@ const RestaurantApp = () => {
     },
     bannerTextContainer: {
       flex: 1,
-      justifyContent: "center",
-      paddingLeft: 40,
+      justifyContent: "space-evenly",
+      paddingLeft: 60,
+      
       paddingRight: 10,
+
     },
     bannerText: {
-      fontSize: 18,
-      fontWeight: "bold",
-      color: "#FFF",
+      fontSize: 23,
+      // fontWeight: "bold",
+      // color: "#FFF",
       textAlign: "left",
     },
     bookNowButton: {
@@ -327,8 +387,10 @@ const RestaurantApp = () => {
       backgroundColor: "#FFF",
       paddingVertical: 10,
       paddingHorizontal: 15,
-      borderRadius: 5,
+      borderRadius: 50,
       alignSelf: "flex-start",
+      borderWidth:1,
+      borderColor:"#FF4B3A"
     },
     bookNowText: {
       color: "#FF4B3A",
@@ -358,6 +420,7 @@ const RestaurantApp = () => {
         {/* {renderPromoBanner()} */}
 
         {/* Horizontal Scroll View for Restaurant Banners */}
+        <Text style={[styles.sectionTitle,{marginBottom:-5}]}>Trending</Text>
         <FlatList
           data={restaurants}
           renderItem={renderRestaurantItem}
@@ -365,7 +428,6 @@ const RestaurantApp = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.bannerList}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
         />
 
         {/* Categories Section */}
@@ -420,7 +482,6 @@ const RestaurantApp = () => {
               cuisine={restaurant.cuisine}
               rating={restaurant.rating}
               time={restaurant.time}
-              description={restaurant.description}
               restaurantId={restaurant._id}
             />
           </TouchableOpacity>

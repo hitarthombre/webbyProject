@@ -22,7 +22,6 @@ const RestroCard = ({
   name,
   cuisine,
   rating,
-  description,
   time,
   restaurantId,
   promoted,
@@ -118,16 +117,12 @@ const RestroCard = ({
 
           <Text style={styles.Cousin}>{cuisine}</Text>
 
-          <Text style={styles.descriptionText} numberOfLines={2}>
-            {description}
-          </Text>
 
           <View style={styles.restaurantFooter}>
-            <View style={styles.timeContainer}>
+            {/* <View style={styles.timeContainer}>
               <MaterialIcons name="access-time" size={16} color="#666" />
               <Text style={styles.footerTimeText}>{formatTime()}</Text>
-            </View>
-
+            </View> */}
             {promoted && (
               <View style={styles.promotedTag}>
                 <Text style={styles.promotedText}>Promoted</Text>

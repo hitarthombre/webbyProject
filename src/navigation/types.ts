@@ -15,4 +15,8 @@ export type RootStackParamList = {
   bookings: undefined;
   favourite:undefined;
   bookedScreen:undefined;
+  About:undefined;
+  Help:undefined;
+  Settings:undefined;
+  EditProfile:undefined;
 }; 

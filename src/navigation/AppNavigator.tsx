@@ -17,6 +17,10 @@ import BookingsScreen from "../screens/restaurant/BookingScreen";
 import UserDetailsScreen from "../screens/auth/UserDetailsScreen";
 import FavoriteRestaurantsScreen from "../screens/restaurant/FavouriteRestaurantScreen";
 import BookedRestaurantsScreen from "../screens/restaurant/BookedRestaurantsScreen";
+import AboutScreen from "../screens/restaurant/AboutScreen";
+import HelpScreen from "../screens/restaurant/HelpScreen";
+import Settings from "../screens/restaurant/Settings";
+import EditProfileScreen from "../screens/restaurant/EditProfileScreen";
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
@@ -107,9 +111,28 @@ const AppNavigator = () => {
       <Stack.Screen
         name="bookedScreen"
         component={BookedRestaurantsScreen}
-        options={{ headerShown: true, title: "Favourites" }}
+        options={{ headerShown: true, title: "Your Bookings" }}
       />
-   
+      <Stack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{ headerShown: true, title: "About" }}
+      />
+      <Stack.Screen
+        name="Help"
+        component={HelpScreen}
+        options={{ headerShown: true, title: "Help" }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={Settings}
+        options={{ headerShown: true, title: "Settings" }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ headerShown: true, title: "Settings" }}
+      />
     </Stack.Navigator>
   );
 };

@@ -33,9 +33,12 @@ export default function BookedRestaurantsScreen() {
         const response = await axios.get(
           `${API_BASE_URL}/api/userbookings/67d542296b483a573835d488`
         );
-        setBookedRestaurants(response.data);
+        setBookedRestaurants(response.data || []);
       } catch (err) {
-        setError("Failed to load booked restaurants. " + err.message);
+        setError(
+          "Failed to load booked restaurants. " +
+            (err.message || "Unknown error")
+        );
       } finally {
         setLoading(false);
       }
@@ -44,45 +47,66 @@ export default function BookedRestaurantsScreen() {
     fetchBookings();
   }, []);
 
-  const filteredRestaurants = bookedRestaurants.filter((booking) =>
-    booking.restaurantId.restaurantName
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+  const filteredRestaurants = bookedRestaurants.filter((booking) => {
+    // Check if booking and restaurantId exist before accessing restaurantName
+    return (
+      booking &&
+      booking.restaurantId &&
+      booking.restaurantId.restaurantName &&
+      booking.restaurantId.restaurantName
+        .toLowerCase()
+        .includes((searchQuery || "").toLowerCase())
+    );
+  });
 
   const formatDate = (dateString) => {
-    const options = { weekday: 'short', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    if (!dateString) return "N/A";
+    try {
+      const options = { weekday: "short", month: "short", day: "numeric" };
+      return new Date(dateString).toLocaleDateString("en-US", options);
+    } catch (error) {
+      return "Invalid Date";
+    }
   };
 
   const renderRestaurantCard = (booking) => {
+    // Return null if booking or restaurantId is missing
+    if (!booking || !booking.restaurantId) {
+      return null;
+    }
+
+    const restaurant = booking.restaurantId;
+    const imageUrl =
+      restaurant.image && restaurant.image.length > 0
+        ? restaurant.image[0]
+        : "https://via.placeholder.com/150";
+
     return (
-      <TouchableOpacity 
-        key={booking._id} 
+      <TouchableOpacity
+        key={booking._id || `booking-${Math.random()}`}
         style={styles.bookingCard}
         activeOpacity={0.9}
       >
         {/* Restaurant Image */}
         <Image
-          source={{ 
-            uri: booking.restaurantId.image[0] || "https://via.placeholder.com/150" 
-          }}
+          source={{ uri: imageUrl }}
           style={styles.restaurantImage}
           resizeMode="cover"
+          defaultSource={{ uri: "https://placehold.co/600x400/png" }} // Add a placeholder image in your assets
         />
-        
+
         {/* Restaurant Details */}
         <View style={styles.detailsContainer}>
           <View style={styles.headerRow}>
             <Text style={styles.restaurantName} numberOfLines={1}>
-              {booking.restaurantId.restaurantName}
+              {restaurant.restaurantName || "Unknown Restaurant"}
             </Text>
           </View>
-          
+
           <Text style={styles.cuisineText} numberOfLines={1}>
-            {booking.restaurantId.cuisine}
+            {restaurant.cuisine || "Mixed Cuisine"}
           </Text>
-          
+
           {/* Booking Details */}
           <View style={styles.bookingDetailsContainer}>
             <View style={styles.bookingDetail}>
@@ -91,23 +115,24 @@ export default function BookedRestaurantsScreen() {
                 {formatDate(booking.selectedDate)}
               </Text>
             </View>
-            
+
             <View style={styles.bookingDetail}>
               <Ionicons name="time-outline" size={16} color="#667eea" />
               <Text style={styles.bookingDetailText}>
-                {booking.selectedTimeSlot}
+                {booking.selectedTimeSlot || "Time not specified"}
               </Text>
             </View>
-            
+
             <View style={styles.bookingDetail}>
               <Ionicons name="people-outline" size={16} color="#667eea" />
               <Text style={styles.bookingDetailText}>
-                {booking.membersCount} {booking.membersCount === 1 ? 'Guest' : 'Guests'}
+                {booking.membersCount || 0}{" "}
+                {booking.membersCount === 1 ? "Guest" : "Guests"}
               </Text>
             </View>
           </View>
         </View>
-        
+
         {/* Options Button */}
         <TouchableOpacity style={styles.optionsButton}>
           <Ionicons name="ellipsis-vertical" size={20} color="#4A5568" />
@@ -116,7 +141,9 @@ export default function BookedRestaurantsScreen() {
         {/* Rating Badge positioned at bottom right */}
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={14} color="#FFD700" />
-          <Text style={styles.ratingText}>{booking.restaurantId.rating}</Text>
+          <Text style={styles.ratingText}>
+            {restaurant.rating ? restaurant.rating.toFixed(1) : "N/A"}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -154,12 +181,16 @@ export default function BookedRestaurantsScreen() {
           )}
           scrollEventThrottle={16}
         >
-          {filteredRestaurants.length > 0 ? (
-            filteredRestaurants.map(renderRestaurantCard)
+          {filteredRestaurants && filteredRestaurants.length > 0 ? (
+            filteredRestaurants.map((booking) =>
+              booking ? renderRestaurantCard(booking) : null
+            )
           ) : (
             <View style={styles.emptyStateContainer}>
               <Ionicons name="calendar-outline" size={60} color="#E2E8F0" />
-              <Text style={styles.noDataText}>No restaurant bookings found.</Text>
+              <Text style={styles.noDataText}>
+                No restaurant bookings found.
+              </Text>
               <Text style={styles.emptyStateSubText}>
                 Your upcoming reservations will appear here.
               </Text>

@@ -1,4 +1,11 @@
-import { View, Image, Alert, Linking,StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Image,
+  Alert,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { Input, Button, Text } from "@ui-kitten/components";
 import tw from "twrnc";
 import { useState, useEffect } from "react";
@@ -28,9 +35,6 @@ const LoginScreen = () => {
   useEffect(() => {
     // signOutFromGoogle()
     checkPreviousLogin();
-    navigation.dispatch(
-      CommonActions.preload('Home')
-    );
   }, []);
 
   // Check if user is already logged in
@@ -38,6 +42,7 @@ const LoginScreen = () => {
     try {
       const userJson = await SecureStore.getItemAsync("user");
       if (userJson) {
+        navigation.dispatch(CommonActions.preload("Home"));
         const storedUser = JSON.parse(userJson);
         setUser(storedUser);
         console.log("Previous login:", storedUser._id);
@@ -52,7 +57,7 @@ const LoginScreen = () => {
   const handleGoogleSignIn = async () => {
     setIsInProgress(true);
     const currentUser = await hasPreviousSignIn();
-  
+
     if (currentUser) {
       const loggedInUser = {
         email: currentUser.user.email,
@@ -60,7 +65,7 @@ const LoginScreen = () => {
         name: currentUser.user.name,
         photoUrl: currentUser.user.photo,
       };
-  
+
       try {
         const response = await axios.get(`${API_BASE_URL}/api/users/login`, {
           params: {
@@ -68,13 +73,13 @@ const LoginScreen = () => {
             idToken: loggedInUser.idToken,
           },
         });
-  
+
         // Store user in SecureStore
         await SecureStore.setItemAsync(
           "user",
           JSON.stringify(response.data.user)
         );
-  
+
         setUser(response.data.user);
         // Use 'replace' instead of 'navigate' if you want to replace the current screen
         navigation.replace("Home");
@@ -87,7 +92,7 @@ const LoginScreen = () => {
       }
       return;
     }
-    
+
     try {
       const userInfo = await signUpWithGoogle();
       if (userInfo.type === "success") {
@@ -110,8 +115,11 @@ const LoginScreen = () => {
           return;
         } else {
           // Store user in SecureStore
-          await SecureStore.setItemAsync('user', JSON.stringify(response.data.user));
-          
+          await SecureStore.setItemAsync(
+            "user",
+            JSON.stringify(response.data.user)
+          );
+
           if (response.status === 201) {
             Alert.alert(
               "Sign-In Successful",
@@ -241,24 +249,24 @@ const LoginScreen = () => {
         isInProgress={isInProgress}
       /> */}
       <TouchableOpacity
-            style={[
-              styles.buttonContainer,
-              { borderColor: colors.primary },
-              isInProgress && styles.disabled
-            ]}
-            onPress={handleGoogleSignIn}
-            disabled={isInProgress}
-            activeOpacity={0.7}
-          >
-            <View style={styles.contentContainer}>
-              <Image
-                source={require('../../../assets/images/google_icon.png')}
-                style={styles.googleIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.buttonText}>Sign in with Google</Text>
-            </View>
-          </TouchableOpacity>
+        style={[
+          styles.buttonContainer,
+          { borderColor: colors.primary },
+          isInProgress && styles.disabled,
+        ]}
+        onPress={handleGoogleSignIn}
+        disabled={isInProgress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.contentContainer}>
+          <Image
+            source={require("../../../assets/images/google_icon.png")}
+            style={styles.googleIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.buttonText}>Sign in with Google</Text>
+        </View>
+      </TouchableOpacity>
       <Button
         appearance="ghost"
         onPress={() => navigation.navigate("Register")}
@@ -304,22 +312,22 @@ const LoginScreen = () => {
 };
 const styles = StyleSheet.create({
   buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 2,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     marginVertical: 10,
-    width: '87%',
+    width: "87%",
     // marginHorizontal:160,
   },
   contentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   googleIcon: {
     width: 24,
@@ -328,11 +336,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#444',
+    fontWeight: "600",
+    color: "#444",
   },
   disabled: {
     opacity: 0.7,
-  }
+  },
 });
 export default LoginScreen;

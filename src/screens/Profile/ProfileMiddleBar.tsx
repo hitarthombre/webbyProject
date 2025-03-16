@@ -33,28 +33,21 @@ const ProfileMiddleBar = () => {
       title: "Favorite Restaurants",
       iconName: "heart",
       color: "#FFFFFF",
-      path: "/components/FavoriteRestaurants/FavoriteRestaurants",
+      path: "favourite",
     },
     2: {
       id: "2",
       title: "Your Bookings",
       iconName: "calendar",
       color: "#FFFFFF",
-      path: "/components/YourBookings/YourBookings",
+      path: "bookedScreen",
     },
     3: {
       id: "3",
-      title: "History",
-      iconName: "time",
-      color: "#FFFFFF",
-      path: "/components/History/History",
-    },
-    4: {
-      id: "4",
       title: "About",
       iconName: "alert",
       color: "#FFFFFF",
-      path: "/components/About/About",
+      path: "About",
     },
   };
 
@@ -74,27 +67,7 @@ const ProfileMiddleBar = () => {
   const navigation = useNavigation();
   // Function to handle navigation when an item is clicked
   const handleItemPress = (path: string) => {
-    // router.push(path); // Navigates to the given path
-    switch (path) {
-      case "Favorite Restaurants":
-        navigation.navigate("favourite");
-        break;
-      case "Your Bookings":
-        navigation.navigate("bookedScreen");
-        break;
-      case "History":
-        navigation.navigate("Home");
-        break;
-      case "About":
-        navigation.navigate("Home");
-        break;
-      case "Payment":
-        navigation.navigate("paymentScreen");
-        break;
-      default:
-        navigation.navigate(path);
-        break;
-    }
+    navigation.navigate(path);
   };
 
   // Convert dictionary to an array for FlatList
@@ -114,7 +87,7 @@ const ProfileMiddleBar = () => {
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => handleItemPress(item.title)} // Calling the navigation function
+            onPress={() => handleItemPress(item.path)} // Calling the navigation function
           >
             <View
               style={[
