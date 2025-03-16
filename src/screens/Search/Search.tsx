@@ -16,10 +16,7 @@ import SearchModal from "./SearchModal";
 import API_BASE_URL from "../../../config";
 import NavigationBar from "../../components/NavigationBar";
 import FilterModal from "../../components/FilterModal";
-import {
-  SafeAreaInsetsContext,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // Filter options data
@@ -57,12 +54,11 @@ interface Restaurant {
 
 const Search = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
-
   const styles = StyleSheet.create({
     container: {
-      paddingTop: insets.top,
       flex: 1,
       backgroundColor: "#F8F8F8",
+      paddingTop:insets.top
     },
     searchBar: {
       flexDirection: "row",
@@ -203,6 +199,7 @@ const Search = ({ navigation }: any) => {
       fontWeight: "500",
     },
   });
+
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Restaurant[]>([]);
@@ -210,9 +207,13 @@ const Search = ({ navigation }: any) => {
   const [randomExtraRestaurants, setRandomExtraRestaurants] = useState<
     Restaurant[]
   >([]);
+    
+  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+const [selectedRatings, setSelectedRatings] = useState<string>("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [apiLink, setApiLink] = useState<string>("");
 
-  // filter modal section
+  // filter modal section 
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const handleOpenFilter = () => {
@@ -223,10 +224,17 @@ const Search = ({ navigation }: any) => {
     setFilterModalVisible(false);
   };
 
-  const handleApplyFilters = () => {
-    // Handle applying filters here
+  // const handleApplyFilters = () => {
+  //   // Handle applying filters here
+  //   setFilterModalVisible(false);
+  // };
+  const handleApplyFilters = (filters: { cuisines: string[], ratings: string }) => {
+    setSelectedCuisines(filters.cuisines);
+    setSelectedRatings(filters.ratings);
+    setApiLink(generateApiLink());
     setFilterModalVisible(false);
   };
+  
 
   const handleClearFilters = () => {
     // Handle clearing filters here
@@ -234,12 +242,55 @@ const Search = ({ navigation }: any) => {
 
   const scrollY = new Animated.Value(0);
 
+  // const generateApiLink = () => {
+  //   const baseUrl = `${API_BASE_URL}/api/restaurants/filtered-search`; // Ensure this is the correct endpoint
+  //   const params: Record<string, string | string[]> = {
+  //     term: searchText, // Include the search term from SearchModal
+  //     cusines: '', // Include selected cuisines (update as needed)
+  //     ratings: '', // Include selected ratings (update as needed)
+  //   };
+
+  //   const queryString = Object.entries(params)
+  //     .map(([key, value]) => {
+  //       if (Array.isArray(value)) {
+  //         return `${key}=${value.join(',')}`;
+  //       }
+  //       return `${key}=${value}`;
+  //     })
+  //     .join('&');
+
+  //   return `${baseUrl}?${queryString}`;
+  // };
+
+  const generateApiLink = () => {
+    const baseUrl = `${API_BASE_URL}/api/restaurants/filtered-search`;
+    
+    const params: Record<string, string | string[]> = {
+      term: searchText, // Search text from modal
+      cuisines: selectedCuisines, // Cuisine filter from FilterModal
+      ratings: selectedRatings, // Ratings filter from FilterModal
+    };
+  
+    const queryString = Object.entries(params)
+      .filter(([_, value]) => value.length) // Remove empty values
+      .map(([key, value]) =>
+        Array.isArray(value) ? `${key}=${value.join(",")}` : `${key}=${value}`
+      )
+      .join("&");
+  
+    return `${baseUrl}?${queryString}`;
+  };
+
   useEffect(() => {
     if (searchText.trim().length === 0) {
       setSuggestions([]);
       return;
     }
-    fetch(`${API_BASE_URL}/api/restaurants/search?term=${searchText}`)
+
+    const linkToUse = generateApiLink(); // Generate link with current searchText
+    console.log('Using API Link for Search:', linkToUse);
+
+    fetch(linkToUse)
       .then((response) => response.json())
       .then((data) => {
         setSuggestions(data.results || []);
@@ -247,7 +298,8 @@ const Search = ({ navigation }: any) => {
       .catch((error) => {
         console.error("Error fetching search results:", error);
       });
-  }, [searchText]);
+  }, [searchText]); // Runs when searchText changes
+  
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/restaurants/random`)
@@ -295,9 +347,9 @@ const Search = ({ navigation }: any) => {
         selectedFilters.includes(item.id) && styles.filterChipSelected,
       ]}
       onPress={() => {
-        toggleFilter(item.id);
-        if (item.label === "Filter") {
-          handleOpenFilter();
+        toggleFilter(item.id)
+        if(item.label === "Filter"){
+          handleOpenFilter()
         }
       }}
     >
@@ -318,6 +370,7 @@ const Search = ({ navigation }: any) => {
   );
 
   const renderRestaurantItem = ({ item }: { item: Restaurant }) => (
+    
     <TouchableOpacity
       style={styles.restaurantCard}
       onPress={() => handleSuggestionPress(item)}
@@ -361,7 +414,8 @@ const Search = ({ navigation }: any) => {
         visible={filterModalVisible}
         onClose={handleCloseFilter}
         onApply={handleApplyFilters}
-        onClear={handleClearFilters}
+        // searchText={searchText}
+        onClear={() => setApiLink("")}
       />
       <Animated.ScrollView
         onScroll={Animated.event(
@@ -423,5 +477,6 @@ const Search = ({ navigation }: any) => {
     </SafeAreaView>
   );
 };
+
 
 export default Search;

@@ -13,4 +13,6 @@ export type RootStackParamList = {
   RestaurantBooking: undefined;
   categories: undefined;
   bookings: undefined;
+  favourite:undefined;
+  bookedScreen:undefined;
 }; 

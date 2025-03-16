@@ -1,4 +1,4 @@
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator } from "@react-navigation/stack";
 import { RootStackParamList } from "./types";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
@@ -14,8 +14,9 @@ import CategoryScreen from "../screens/restaurant/CategoryScreen";
 import MenuScreen from "../screens/restaurant/MenuScreen";
 import Demo from "../screens/Demo";
 import BookingsScreen from "../screens/restaurant/BookingScreen";
-import UserDetailsScreen from '../screens/auth/UserDetailsScreen';
-
+import UserDetailsScreen from "../screens/auth/UserDetailsScreen";
+import FavoriteRestaurantsScreen from "../screens/restaurant/FavouriteRestaurantScreen";
+import BookedRestaurantsScreen from "../screens/restaurant/BookedRestaurantsScreen"
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
@@ -97,6 +98,16 @@ const AppNavigator = () => {
         name="bookings"
         component={BookingsScreen}
         options={{ headerShown: false, title: "Restaurant Booking" }}
+      />
+      <Stack.Screen
+        name="favourite"
+        component={FavoriteRestaurantsScreen}
+        options={{ headerShown: true, title: "Favourites" }}
+      />
+      <Stack.Screen
+        name="bookedScreen"
+        component={BookedRestaurantsScreen}
+        options={{ headerShown: true, title: "Favourites" }}
       />
     </Stack.Navigator>
   );

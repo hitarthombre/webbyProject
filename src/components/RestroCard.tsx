@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import API_BASE_URL from "../../config";
+import userStore from "../zustand/userStore";
 
 const Screenwidth = Dimensions.get("window").width;
 const Screenheight = Dimensions.get("window").height;
@@ -29,8 +30,29 @@ const RestroCard = ({
   const navigation = useNavigation();
   const [isFavorite, setIsFavorite] = useState(false); // State for favorite icon
   const [restaurant, setRestaurant] = useState({});
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const [userId, setUserId] = useState("");
+  const [favoriteRest, setFavoriteRest] = useState([]);
+  const { getUser } = userStore();
+  const toggleFavorite = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/restaurants/toggleFavorite`,
+        {
+          restaurantId: restaurantId,
+          userId: userId,
+        }
+      );
+
+      if (response) {
+        setFavoriteRest((prevFavorites) =>
+          prevFavorites.includes(restaurantId)
+            ? prevFavorites.filter((id) => id !== restaurantId)
+            : [...prevFavorites, restaurantId]
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
   };
 
   const formatTime = () => {
@@ -40,7 +62,9 @@ const RestroCard = ({
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/restaurants/getOne/${restaurantId}`);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/restaurants/getOne/${restaurantId}`
+        );
         setRestaurant(response.data);
       } catch (error) {
         // console.error("Error fetching restaurant data: ", error);
@@ -49,24 +73,37 @@ const RestroCard = ({
 
     fetchRestaurant();
   }, [restaurantId]);
-  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const pUser = getUser();
+        console.log(pUser);
+        const response = await axios.post(`${API_BASE_URL}/api/users/getUser`, {
+          _id: pUser._id,
+        });
+        setUserId(response.data.user._id);
+        setFavoriteRest(response.data.user.favoriteRestraunts || []);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.Box} onPress={() => navigation.navigate("RestaurantHomePage", {restaurant})}>
+      <TouchableOpacity
+        style={styles.Box}
+        onPress={() =>
+          navigation.navigate("RestaurantHomePage", { restaurant })
+        }
+      >
         <Image source={{ uri: image }} style={styles.img} />
-        
-       
-        
-        
-        
-        <TouchableOpacity
-          onPress={toggleFavorite}
-          style={styles.favoriteIcon}
-        >
+
+        <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
           <MaterialIcons
             name="favorite"
             size={24}
-            color={isFavorite ? "red" : "gray"}
+            color={favoriteRest.includes(restaurantId) ? "red" : "gray"}
           />
         </TouchableOpacity>
 
@@ -78,22 +115,19 @@ const RestroCard = ({
               <MaterialIcons name="star" size={16} color="#FFF" />
             </View>
           </View>
-          
+
           <Text style={styles.Cousin}>{cuisine}</Text>
-          
-          <Text
-            style={styles.descriptionText}
-            numberOfLines={2}
-          >
+
+          <Text style={styles.descriptionText} numberOfLines={2}>
             {description}
           </Text>
-          
+
           <View style={styles.restaurantFooter}>
             <View style={styles.timeContainer}>
               <MaterialIcons name="access-time" size={16} color="#666" />
               <Text style={styles.footerTimeText}>{formatTime()}</Text>
             </View>
-            
+
             {promoted && (
               <View style={styles.promotedTag}>
                 <Text style={styles.promotedText}>Promoted</Text>

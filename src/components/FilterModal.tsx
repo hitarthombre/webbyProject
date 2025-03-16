@@ -11,6 +11,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import API_BASE_URL from '../../config';
 
 interface FilterModalProps {
   visible: boolean;
@@ -54,21 +55,21 @@ const FilterModal: React.FC<FilterModalProps> = ({
       title: 'Sort',
       options: []
     },
-    {
-      id: 'availableToday',
-      title: 'Available Today',
-      options: []
-    },
-    {
-      id: 'availableTomorrow',
-      title: 'Available Tomorrow',
-      options: []
-    },
-    {
-      id: 'distance',
-      title: 'Distance',
-      options: []
-    },
+    // {
+    //   id: 'availableToday',
+    //   title: 'Available Today',
+    //   options: []
+    // },
+    // {
+    //   id: 'availableTomorrow',
+    //   title: 'Available Tomorrow',
+    //   options: []
+    // },
+    // {
+    //   id: 'distance',
+    //   title: 'Distance',
+    //   options: []
+    // },
     {
       id: 'ratings',
       title: 'Ratings',
@@ -79,36 +80,47 @@ const FilterModal: React.FC<FilterModalProps> = ({
       title: 'Restaurant Category',
       options: []
     },
-    {
-      id: 'dietaryPreferences',
-      title: 'Dietary Preferences',
-      options: []
-    },
-    {
-      id: 'discount',
-      title: 'Discount',
-      options: []
-    },
-    {
-      id: 'amenities',
-      title: 'Amenities',
-      options: []
-    },
-    {
-      id: 'costForTwo',
-      title: 'Cost for two',
-      options: []
-    },
-    {
-      id: 'moreFilters',
-      title: 'More filters',
-      options: []
-    },
+    // {
+    //   id: 'dietaryPreferences',
+    //   title: 'Dietary Preferences',
+    //   options: []
+    // },
+    // {
+    //   id: 'discount',
+    //   title: 'Discount',
+    //   options: []
+    // },
+    // {
+    //   id: 'amenities',
+    //   title: 'Amenities',
+    //   options: []
+    // },
+    // {
+    //   id: 'costForTwo',
+    //   title: 'Cost for two',
+    //   options: []
+    // },
+    // {
+    //   id: 'moreFilters',
+    //   title: 'More filters',
+    //   options: []
+    // },
     {
       id: 'cuisines',
       title: 'Cuisines',
       options: []
     },
+  ];
+
+  const cuisineOptions = [
+    { id: 'indian', label: 'Indian' },
+    { id: 'marathi', label: 'Marathi' },
+    { id: 'gujarati', label: 'Gujarati' },
+    { id: 'indonesian', label: 'Indonesian' },
+    { id: 'thai', label: 'Thai' },
+    { id: 'chinese', label: 'Chinese' },
+    { id: 'italian', label: 'Italian' },
+    { id: 'southIndian', label: 'South Indian' },
   ];
 
   const sortOptions = [
@@ -258,10 +270,82 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </View>
         );
 
+      case 'cuisines':
+        return (
+          <View>
+            <Text style={styles.optionsTitle}>CUISINES</Text>
+            {cuisineOptions.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                style={styles.optionContainer}
+                onPress={() => {
+                  if (selectedCategories.includes(option.id)) {
+                    setSelectedCategories(selectedCategories.filter(id => id !== option.id));
+                  } else {
+                    setSelectedCategories([...selectedCategories, option.id]);
+                  }
+                }}
+              >
+                <View style={styles.checkboxContainer}>
+                  <View style={[
+                    styles.checkbox,
+                    selectedCategories.includes(option.id) && styles.checkboxSelected
+                  ]}>
+                    {selectedCategories.includes(option.id) && (
+                      <Ionicons name="checkmark" size={14} color="#FFF" />
+                    )}
+                  </View>
+                  <Text style={styles.optionLabel}>{option.label}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        );
+
+
       default:
         return null;
     }
   };
+
+  const generateApiLink = () => {
+    const baseUrl = `${API_BASE_URL}/api/restaurants/filtered-search`; // Replace with your actual API base URL
+    const params: Record<string, string | string[]> = {
+      // sort: selectedSort,
+      // distance: selectedDistance,
+      cusines: selectedCategories,
+      ratings: selectedRating,
+      
+    };
+
+    // Construct query string
+    const queryString = Object.entries(params)
+      .map(([key, value]) => {
+        if (Array.isArray(value)) {
+          return `${key}=${value.join(',')}`; // Join array values
+        }
+        return `${key}=${value}`;
+      })
+      .join('&');
+
+    return `${baseUrl}?${queryString}`;
+  };
+
+  // const handleApply = () => {
+  //   const apiLink = generateApiLink();
+  //   console.log('Generated API Link:', apiLink); // Log the API link or handle it as needed
+  //   onApply(); // Call the original onApply function
+  // };
+
+  const handleApply = () => {
+    const filters = {
+      cuisines: selectedCategories, // Selected cuisines
+      ratings: selectedRating, // Selected rating
+    };
+    
+    onApply(filters); // Pass filters to Search.tsx
+  };
+  
 
   return (
     <Modal
@@ -322,7 +406,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               <TouchableOpacity style={styles.clearButton} onPress={onClear}>
                 <Text style={styles.clearButtonText}>Clear Filters</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.applyButton} onPress={onApply}>
+              <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
                 <Text style={styles.applyButtonText}>Apply</Text>
               </TouchableOpacity>
             </View>

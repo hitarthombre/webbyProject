@@ -75,7 +75,23 @@ const navigation = useNavigation();
   // Function to handle navigation when an item is clicked
   const handleItemPress = (path: string) => {
     // router.push(path); // Navigates to the given path
-    navigation.navigate("bookings");
+    switch (path) {
+      case "Favorite Restaurants":
+      navigation.navigate("favourite");
+      break;
+      case "Your Bookings":
+      navigation.navigate("bookings");
+      break;
+      case "History":
+      navigation.navigate("Home");
+      break;
+      case "About":
+      navigation.navigate("Home");
+      break;
+      default:
+      navigation.navigate(path);
+      break;
+    }
     
   };
 
@@ -95,7 +111,7 @@ const navigation = useNavigation();
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => handleItemPress(item.path)} // Calling the navigation function
+            onPress={() => handleItemPress(item.title)} // Calling the navigation function
           >
             <View
               style={[
