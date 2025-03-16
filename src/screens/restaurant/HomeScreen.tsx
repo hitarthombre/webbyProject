@@ -11,6 +11,7 @@ import {
   Modal,
   FlatList,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -22,9 +23,10 @@ import API_BASE_URL from "../../../config";
 import userStore from "../../zustand/userStore";
 import restaurantStore from "../../zustand/RestaurantStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CommonActions, useFocusEffect } from "@react-navigation/native";
+import { CommonActions, useFocusEffect, useNavigation } from "@react-navigation/native";
 
-const RestaurantApp = ({ navigation }: any) => {
+const RestaurantApp = () => {
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { getUser } = userStore();
   const { getRestaurants, setRestaurants } = restaurantStore();
@@ -33,6 +35,7 @@ const RestaurantApp = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [localRestaurants, setLocalRestaurants] = useState([]);
+  const [restaurants, setRestaurantsState] = useState([]);
 
   const fetchRestaurantDetails = async () => {
     try {
@@ -86,6 +89,15 @@ const RestaurantApp = ({ navigation }: any) => {
       const fetchedCategories = await fetchCategories();
       setCategories(fetchedCategories);
       await fetchUser();
+
+      // Fetch restaurant data
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/restaurants/getRandomPromoted`);
+        setRestaurantsState(response.data.results);
+      } catch (error) {
+        console.error("Error fetching promoted restaurants:", error.message);
+      }
+
       setLoading(false);
     };
 
@@ -133,6 +145,25 @@ const RestaurantApp = ({ navigation }: any) => {
         }}
         style={styles.promoImage}
       />
+    </LinearGradient>
+  );
+
+  // Function to render each restaurant item
+  const renderRestaurantItem = ({ item }: { item: any }) => (
+    <LinearGradient
+      colors={["#FF4B3A", "#FF8C8A"]}
+      style={styles.bannerContainer}
+    >
+      <Image source={{ uri: item.image[0] }} style={styles.bannerImage} />
+      <View style={styles.bannerTextContainer}>
+        <Text style={styles.bannerText}>{item.restaurantName}</Text>
+        <TouchableOpacity
+          style={styles.bookNowButton}
+          onPress={() => navigation.navigate("RestaurantHomePage", { restaurant: item })}
+        >
+          <Text style={styles.bookNowText}>Book Now</Text>
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   );
 
@@ -257,6 +288,53 @@ const RestaurantApp = ({ navigation }: any) => {
       alignItems: "center",
       backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
+    bannerList: {
+      height: 140,
+      marginVertical: 16,
+    },
+    bannerContainer: {
+      justifyContent: "space-between",
+      flexDirection: "row",
+      alignItems: "center",
+      width: Dimensions.get("window").width * 0.9,
+      height: 120,
+      marginRight: 10,
+      borderRadius: 8,
+      overflow: "hidden",
+      elevation: 2,
+    },
+    bannerImage: {
+      // marginLeft: ,
+      width: "35%",
+      height: "100%",
+      borderTopLeftRadius: 8,
+      borderBottomLeftRadius: 8,
+    },
+    bannerTextContainer: {
+      flex: 1,
+      justifyContent: "center",
+      paddingLeft: 40,
+      paddingRight: 10,
+    },
+    bannerText: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: "#FFF",
+      textAlign: "left",
+    },
+    bookNowButton: {
+      marginTop: 10,
+      backgroundColor: "#FFF",
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      borderRadius: 5,
+      alignSelf: "flex-start",
+    },
+    bookNowText: {
+      color: "#FF4B3A",
+      fontWeight: "600",
+      fontSize: 16,
+    },
   });
 
   return (
@@ -277,7 +355,18 @@ const RestaurantApp = ({ navigation }: any) => {
         {renderHeader()}
 
         {/* Promotion Banner */}
-        {renderPromoBanner()}
+        {/* {renderPromoBanner()} */}
+
+        {/* Horizontal Scroll View for Restaurant Banners */}
+        <FlatList
+          data={restaurants}
+          renderItem={renderRestaurantItem}
+          keyExtractor={(item) => item._id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.bannerList}
+          contentContainerStyle={{ paddingHorizontal: 10 }}
+        />
 
         {/* Categories Section */}
         <View style={styles.categoriesSection}>

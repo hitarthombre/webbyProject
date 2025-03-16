@@ -16,7 +16,7 @@ import Demo from "../screens/Demo";
 import BookingsScreen from "../screens/restaurant/BookingScreen";
 import UserDetailsScreen from "../screens/auth/UserDetailsScreen";
 import FavoriteRestaurantsScreen from "../screens/restaurant/FavouriteRestaurantScreen";
-import BookedRestaurantsScreen from "../screens/restaurant/BookedRestaurantsScreen"
+import BookedRestaurantsScreen from "../screens/restaurant/BookedRestaurantsScreen";
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
@@ -109,6 +109,7 @@ const AppNavigator = () => {
         component={BookedRestaurantsScreen}
         options={{ headerShown: true, title: "Favourites" }}
       />
+   
     </Stack.Navigator>
   );
 };

@@ -23,9 +23,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const filterOptions = [
   { id: "1", label: "Filter", icon: "options-outline" },
   { id: "2", label: "Sort by", icon: "swap-vertical-outline" },
-  { id: "3", label: "Available Today", icon: "calendar-outline" },
+  // { id: "3", label: "Available Today", icon: "calendar-outline" },
   { id: "4", label: "Pure Veg", icon: "leaf-outline" },
-  { id: "5", label: "Delivery Time", icon: "time-outline" },
+  // { id: "5", label: "Delivery Time", icon: "time-outline" },
   { id: "6", label: "Rating 4.0+", icon: "star-outline" },
 ];
 
@@ -50,6 +50,7 @@ interface Restaurant {
   rating: string;
   description: string;
   promoted: boolean;
+  pureVeg: boolean;
 }
 
 const Search = ({ navigation }: any) => {
@@ -58,7 +59,7 @@ const Search = ({ navigation }: any) => {
     container: {
       flex: 1,
       backgroundColor: "#F8F8F8",
-      paddingTop:insets.top
+      paddingTop: insets.top,
     },
     searchBar: {
       flexDirection: "row",
@@ -207,14 +208,20 @@ const Search = ({ navigation }: any) => {
   const [randomExtraRestaurants, setRandomExtraRestaurants] = useState<
     Restaurant[]
   >([]);
-    
+
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
-const [selectedRatings, setSelectedRatings] = useState<string>("");
+  const [selectedRatings, setSelectedRatings] = useState<string>("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [apiLink, setApiLink] = useState<string>("");
 
-  // filter modal section 
+  // filter modal section
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+  const [filterCount, setFilterCount] = useState<number>(5);
+  const [filterSort, setFilterSort] = useState<string>("desc");
+  const [isVeg, setIsVeg] = useState<boolean>(false);
+
+  const [minRating, setMinRating] = useState<string | null>(null);
 
   const handleOpenFilter = () => {
     setFilterModalVisible(true);
@@ -224,17 +231,42 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
     setFilterModalVisible(false);
   };
 
-  // const handleApplyFilters = () => {
-  //   // Handle applying filters here
-  //   setFilterModalVisible(false);
-  // };
-  const handleApplyFilters = (filters: { cuisines: string[], ratings: string }) => {
+  const handleFilterButtonPress = (
+    minRating: string | null,
+    isVeg: boolean
+  ) => {
+    const linkToUse = `${API_BASE_URL}/api/restaurants/filterRandom?minRating=${
+      minRating || ""
+    }&isVeg=${isVeg}&count=${filterCount}&sort=${filterSort}`;
+
+    // Log the generated query for filtered random restaurants
+    console.log("Generated API Query for Filtered Random:", linkToUse);
+
+    fetch(linkToUse)
+      .then((response) => response.json())
+      .then((data) => {
+        setRandomRestaurants(data.results || []);
+        setRandomExtraRestaurants(shuffleArray(data.results));
+      })
+      .catch((error) => {
+        console.error("Error fetching filtered random restaurants:", error);
+      });
+  };
+
+  const handleApplyFilters = (filters: {
+    cuisines: string[];
+    ratings: string;
+  }) => {
     setSelectedCuisines(filters.cuisines);
     setSelectedRatings(filters.ratings);
     setApiLink(generateApiLink());
     setFilterModalVisible(false);
+
+    handleFilterButtonPress(
+      filters.ratings,
+      filters.cuisines.includes("Pure Veg")
+    );
   };
-  
 
   const handleClearFilters = () => {
     // Handle clearing filters here
@@ -242,42 +274,22 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
 
   const scrollY = new Animated.Value(0);
 
-  // const generateApiLink = () => {
-  //   const baseUrl = `${API_BASE_URL}/api/restaurants/filtered-search`; // Ensure this is the correct endpoint
-  //   const params: Record<string, string | string[]> = {
-  //     term: searchText, // Include the search term from SearchModal
-  //     cusines: '', // Include selected cuisines (update as needed)
-  //     ratings: '', // Include selected ratings (update as needed)
-  //   };
-
-  //   const queryString = Object.entries(params)
-  //     .map(([key, value]) => {
-  //       if (Array.isArray(value)) {
-  //         return `${key}=${value.join(',')}`;
-  //       }
-  //       return `${key}=${value}`;
-  //     })
-  //     .join('&');
-
-  //   return `${baseUrl}?${queryString}`;
-  // };
-
   const generateApiLink = () => {
     const baseUrl = `${API_BASE_URL}/api/restaurants/filtered-search`;
-    
+
     const params: Record<string, string | string[]> = {
       term: searchText, // Search text from modal
       cuisines: selectedCuisines, // Cuisine filter from FilterModal
       ratings: selectedRatings, // Ratings filter from FilterModal
     };
-  
+
     const queryString = Object.entries(params)
       .filter(([_, value]) => value.length) // Remove empty values
       .map(([key, value]) =>
         Array.isArray(value) ? `${key}=${value.join(",")}` : `${key}=${value}`
       )
       .join("&");
-  
+
     return `${baseUrl}?${queryString}`;
   };
 
@@ -288,7 +300,7 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
     }
 
     const linkToUse = generateApiLink(); // Generate link with current searchText
-    console.log('Using API Link for Search:', linkToUse);
+    console.log("Using API Link for Search:", linkToUse);
 
     fetch(linkToUse)
       .then((response) => response.json())
@@ -299,7 +311,6 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
         console.error("Error fetching search results:", error);
       });
   }, [searchText]); // Runs when searchText changes
-  
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/restaurants/random`)
@@ -340,37 +351,66 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
     );
   };
 
-  const renderFilterItem = ({ item }: { item: (typeof filterOptions)[0] }) => (
-    <TouchableOpacity
-      style={[
-        styles.filterChip,
-        selectedFilters.includes(item.id) && styles.filterChipSelected,
-      ]}
-      onPress={() => {
-        toggleFilter(item.id)
-        if(item.label === "Filter"){
-          handleOpenFilter()
-        }
-      }}
-    >
-      <Ionicons
-        name={item.icon as any}
-        size={16}
-        color={selectedFilters.includes(item.id) ? "#FFF" : "#666"}
-      />
-      <Text
+  const toggleSortOrder = () => {
+    setFilterSort((prevSort) => (prevSort === "desc" ? "asc" : "desc"));
+  };
+
+  const renderFilterItem = ({ item }: { item: (typeof filterOptions)[0] }) => {
+    // Determine if the button should be highlighted
+    const isActive =
+      (item.label === "Sort by" && filterSort === "asc") || // Highlight if sort is active
+      (item.label === "Available Today" && isVeg) || // Highlight if vegetarian filter is active
+      (item.label === "Rating 4.0+" && minRating === "4.0") || // Highlight if minRating is active
+      (item.label === "Pure Veg" && isVeg); // Highlight if Pure Veg filter is active
+
+    return (
+      <TouchableOpacity
         style={[
-          styles.filterText,
-          selectedFilters.includes(item.id) && styles.filterTextSelected,
+          styles.filterChip,
+          selectedFilters.includes(item.id) && styles.filterChipSelected,
+          { backgroundColor: isActive ? "#FF4B3A" : "#FFF" }, // Change background color based on active state
         ]}
+        onPress={() => {
+          if (item.label === "Sort by") {
+            toggleSortOrder(); // Toggle sort order
+            handleFilterButtonPress(minRating, isVeg); // Update query with current minRating
+          } else if (item.label === "Available Today") {
+            const newIsVeg = !isVeg; // Toggle vegetarian filter
+            setIsVeg(newIsVeg);
+            handleFilterButtonPress(minRating, newIsVeg); // Update query with new vegetarian filter
+          } else if (item.label === "Rating 4.0+") {
+            // Toggle minRating for the rating button
+            const newMinRating = minRating === "4.0" ? null : "4.0";
+            setMinRating(newMinRating);
+            handleFilterButtonPress(newMinRating, isVeg); // Update query with new minRating
+          } else if (item.label === "Pure Veg") {
+            const newIsVeg = !isVeg; // Toggle vegetarian filter
+            setIsVeg(newIsVeg);
+            handleFilterButtonPress(minRating, newIsVeg); // Update query with new vegetarian filter
+          } else {
+            handleOpenFilter(); // Open filter modal for other filters
+          }
+        }}
       >
-        {item.label}
-      </Text>
-    </TouchableOpacity>
-  );
+        <Ionicons
+          name={item.icon as any}
+          size={16}
+          color={isActive ? "#FFF" : "#666"} // Change icon color based on active state
+        />
+        <Text
+          style={[
+            styles.filterText,
+            selectedFilters.includes(item.id) && styles.filterTextSelected,
+            { color: isActive ? "#FFF" : "#666" }, // Change text color based on active state
+          ]}
+        >
+          {item.label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   const renderRestaurantItem = ({ item }: { item: Restaurant }) => (
-    
     <TouchableOpacity
       style={styles.restaurantCard}
       onPress={() => handleSuggestionPress(item)}
@@ -414,7 +454,6 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
         visible={filterModalVisible}
         onClose={handleCloseFilter}
         onApply={handleApplyFilters}
-        // searchText={searchText}
         onClear={() => setApiLink("")}
       />
       <Animated.ScrollView
@@ -477,6 +516,5 @@ const [selectedRatings, setSelectedRatings] = useState<string>("");
     </SafeAreaView>
   );
 };
-
 
 export default Search;

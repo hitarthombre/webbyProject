@@ -66,33 +66,35 @@ const ProfileMiddleBar = () => {
   }, [systemTheme]);
 
   // const isDarkMode = theme === "dark";
-  const isDarkMode = false
+  const isDarkMode = false;
 
   const backgroundColor = isDarkMode ? "#333" : "#FFF";
 
   // const router = useRouter(); // Initialize useRouter
-const navigation = useNavigation();
+  const navigation = useNavigation();
   // Function to handle navigation when an item is clicked
   const handleItemPress = (path: string) => {
     // router.push(path); // Navigates to the given path
     switch (path) {
       case "Favorite Restaurants":
-      navigation.navigate("favourite");
-      break;
+        navigation.navigate("favourite");
+        break;
       case "Your Bookings":
-      navigation.navigate("bookedScreen");
-      break;
+        navigation.navigate("bookedScreen");
+        break;
       case "History":
-      navigation.navigate("Home");
-      break;
+        navigation.navigate("Home");
+        break;
       case "About":
-      navigation.navigate("Home");
-      break;
+        navigation.navigate("Home");
+        break;
+      case "Payment":
+        navigation.navigate("paymentScreen");
+        break;
       default:
-      navigation.navigate(path);
-      break;
+        navigation.navigate(path);
+        break;
     }
-    
   };
 
   // Convert dictionary to an array for FlatList
@@ -105,7 +107,8 @@ const navigation = useNavigation();
       style={[
         styles.container,
         { backgroundColor: isDarkMode ? "#121212" : "#FFF" },
-      ]}>
+      ]}
+    >
       <FlatList
         data={dataArray}
         renderItem={({ item }) => (
@@ -116,11 +119,13 @@ const navigation = useNavigation();
             <View
               style={[
                 styles.item,
-                { backgroundColor: item.color, 
+                {
+                  backgroundColor: item.color,
                   // borderBottomWidth: 1,
                   // borderColor: "#bababa"
-                 }, // Apply color dynamically
-              ]}>
+                }, // Apply color dynamically
+              ]}
+            >
               <Ionicons
                 name={item.iconName}
                 size={20}
