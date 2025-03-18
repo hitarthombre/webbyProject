@@ -17,7 +17,7 @@ import axios from "axios";
 import API_BASE_URL from "../../../config";
 import userStore from "../../zustand/userStore";
 
-export default function BookedRestaurantsScreen() {
+export default function BookedRestaurantsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState("");
   const [scrollY] = useState(new Animated.Value(0));
@@ -25,6 +25,18 @@ export default function BookedRestaurantsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { getUser } = userStore();
+  const [restaurant, setRestaurant] = useState<any>();
+
+  const fetchRestaurant = async (restaurantId: any) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/restaurants/getOne/${restaurantId}`
+      );
+      setRestaurant(response.data);
+    } catch (error) {
+      // console.error("Error fetching restaurant data: ", error);
+    }
+  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -86,6 +98,10 @@ export default function BookedRestaurantsScreen() {
         key={booking._id || `booking-${Math.random()}`}
         style={styles.bookingCard}
         activeOpacity={0.9}
+        onPress={() => {
+          fetchRestaurant(booking.restaurantId);
+          navigation.navigate("RestaurantHomePage", { restaurant });
+        }}
       >
         {/* Restaurant Image */}
         <Image
@@ -133,10 +149,10 @@ export default function BookedRestaurantsScreen() {
           </View>
         </View>
 
-        {/* Options Button */}
+        {/* Options Button
         <TouchableOpacity style={styles.optionsButton}>
           <Ionicons name="ellipsis-vertical" size={20} color="#4A5568" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Rating Badge positioned at bottom right */}
         <View style={styles.ratingContainer}>

@@ -38,7 +38,7 @@ const bookings = [
 ];
 
 const BookingsScreen = ({ navigation,route}:any) => {
-  const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();z
 
   const renderBookingCard = ({ item }:any) => {
     const isUpcoming = item.status === 'upcoming';

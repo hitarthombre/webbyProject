@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 
 // imports of components
-import Header from "./RestaurantHomePageComponents/Header";
+import Header from "./RestaurantHomePageComponent s/Header";
 import Rating from "./RestaurantHomePageComponents/Rating";
 import ImageCarousel from "./RestaurantHomePageComponents/ImageCarousel";
 import Description from "./RestaurantHomePageComponents/Description";
@@ -192,11 +192,7 @@ const SearchedRestro = ({ route }: any) => {
         >
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="heart-outline" size={24} color="#FFF" />
-          </TouchableOpacity>
-        </View>
+        
       </LinearGradient>
     </View>
   );
