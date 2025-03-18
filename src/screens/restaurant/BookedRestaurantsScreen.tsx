@@ -31,7 +31,7 @@ export default function BookedRestaurantsScreen() {
       try {
         const pUser = getUser();
         const response = await axios.get(
-          `${API_BASE_URL}/api/userbookings/67d542296b483a573835d488`
+          `${API_BASE_URL}/api/userbookings/${pUser._id}`
         );
         setBookedRestaurants(response.data || []);
       } catch (err) {
@@ -142,7 +142,7 @@ export default function BookedRestaurantsScreen() {
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={14} color="#FFD700" />
           <Text style={styles.ratingText}>
-            {restaurant.rating ? restaurant.rating.toFixed(1) : "N/A"}
+            {restaurant.rating ? restaurant.rating : "N/A"}
           </Text>
         </View>
       </TouchableOpacity>

@@ -100,11 +100,9 @@ const CategoryScreen = ({ route, navigation }: any) => {
       <Text style={styles.title}>{category}</Text>
       <ScrollView contentContainerStyle={styles.menuList}>
         {menuItems.map((item) => (
-          <TouchableOpacity
-            key={item._id}
-            style={styles.menuItem}>
+          <TouchableOpacity key={item._id} style={styles.menuItem}>
             {/* onPress={() => navigation.navigate("ItemDetails", { item })}> */}
-            <Image source={{ uri: item.image }} style={styles.itemImage} />
+            <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
             <View style={styles.itemDetails}>
               <Text style={styles.itemName} numberOfLines={1}>
                 {item.name}
@@ -122,7 +120,7 @@ const CategoryScreen = ({ route, navigation }: any) => {
               </View>
             </View>
             <View style={styles.priceSection}>
-              <Text style={styles.itemPrice}>₹{item.price_inr.toFixed(0)}</Text>
+              <Text style={styles.itemPrice}>₹{item.price.toFixed(0)}</Text>
               <Text style={styles.itemType}>{item.isVeg ? "🌱" : "🍗"}</Text>
             </View>
           </TouchableOpacity>

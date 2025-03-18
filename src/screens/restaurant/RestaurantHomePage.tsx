@@ -30,7 +30,7 @@ const SearchedRestro = ({ route }: any) => {
   const { restaurant } = route.params;
 
   // State for distance calculation
-  const [distance, setDistance] = useState('Calculating...');
+  const [distance, setDistance] = useState("Calculating...");
 
   // Static coordinates for Polytechnic, Nizampura, near Shastri Bridge, Vadodara, Gujarat
   const restaurantCoordinates = {
@@ -45,8 +45,10 @@ const SearchedRestro = ({ route }: any) => {
     const dLon = deg2rad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c; // Distance in km
     return d.toFixed(1);
@@ -64,24 +66,24 @@ const SearchedRestro = ({ route }: any) => {
           (position) => {
             const userLat = position.coords.latitude;
             const userLong = position.coords.longitude;
-            
+
             const calculatedDistance = calculateDistance(
               userLat,
               userLong,
               restaurantCoordinates.latitude,
               restaurantCoordinates.longitude
             );
-            
+
             setDistance(`${calculatedDistance} km`);
           },
           (error) => {
             console.error("Error getting location:", error);
-            setDistance('2 km'); // Fallback to default
+            setDistance("2 km"); // Fallback to default
           },
           { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
       } else {
-        setDistance('2 km'); // Fallback if geolocation isn't available
+        setDistance("2 km"); // Fallback if geolocation isn't available
       }
     };
 
@@ -161,9 +163,9 @@ const SearchedRestro = ({ route }: any) => {
 
   // Update restro when distance changes
   useEffect(() => {
-    setRestro(prev => ({
+    setRestro((prev) => ({
       ...prev,
-      far: distance
+      far: distance,
     }));
   }, [distance]);
 
@@ -376,9 +378,7 @@ const SearchedRestro = ({ route }: any) => {
                   <Ionicons name="location" size={24} color="#FFF" />
                   <Text style={styles.mapButtonText}>View on Google Maps</Text>
                 </View>
-                <Text style={styles.mapAddressText}>
-                  Polytechnic, Nizampura, near Shastri Bridge, Vadodara, Gujarat
-                </Text>
+                <Text style={styles.mapAddressText}>{restro.location}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -409,7 +409,6 @@ const SearchedRestro = ({ route }: any) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -495,7 +494,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#1A1A1A",
-    width:"70%",
+    width: "70%",
   },
   ratingContainer: {
     flexDirection: "row",

@@ -96,7 +96,7 @@ const AppNavigator = () => {
       <Stack.Screen
         name="categories"
         component={CategoryScreen}
-        options={{ headerShown: false, title: "Restaurant Booking" }}
+        options={{ headerShown: true, title: "Categories" }}
       />
       <Stack.Screen
         name="bookings"
