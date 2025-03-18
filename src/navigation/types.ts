@@ -19,4 +19,5 @@ export type RootStackParamList = {
   Help:undefined;
   Settings:undefined;
   EditProfile:undefined;
+  SplashScreen:undefined;
 }; 

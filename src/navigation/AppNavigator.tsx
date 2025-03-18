@@ -21,12 +21,13 @@ import AboutScreen from "../screens/restaurant/AboutScreen";
 import HelpScreen from "../screens/restaurant/HelpScreen";
 import Settings from "../screens/restaurant/Settings";
 import EditProfileScreen from "../screens/restaurant/EditProfileScreen";
+import SplashScreen from "../screens/SplashScreen";
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName="SplashScreen"
       screenOptions={{
         headerShown: true,
       }}
@@ -132,6 +133,11 @@ const AppNavigator = () => {
         name="EditProfile"
         component={EditProfileScreen}
         options={{ headerShown: true, title: "Settings" }}
+      />
+      <Stack.Screen
+        name="SplashScreen"
+        component={SplashScreen}
+        options={{ headerShown: false, title: "WELCOME TO WEBBY" }}
       />
     </Stack.Navigator>
   );

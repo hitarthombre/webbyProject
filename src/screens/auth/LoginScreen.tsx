@@ -215,9 +215,10 @@ const LoginScreen = () => {
     <View style={tw`flex-1 justify-center p-4 items-center`}>
       <Image
         source={require("../../../assets/images/auth_icon.png")}
-        style={tw`w-full h-30 mb-8`}
+        style={tw`w-full h-40 mb-8`}
+        resizeMode="contain"
       />
-      <Text style={tw`text-2xl mb-8 text-center font-bold`}>Login</Text>
+      <Text style={tw`text-3xl mb-8 text-center font-bold`}>LOGIN</Text>
       <Input
         keyboardType="email-address"
         placeholder="Email"

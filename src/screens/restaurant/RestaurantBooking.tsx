@@ -17,7 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import userStore from "../../zustand/userStore";
 import axios from "axios";
 import API_BASE_URL from "../../../config";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Define type interfaces
 interface DateItem {
@@ -181,7 +181,7 @@ const RestaurantBooking = ({ route }: any) => {
         );
         return;
       }
-  
+
       const selectedDateObj = generateDates().find(
         (d) => d.id === selectedDate
       );
@@ -195,11 +195,11 @@ const RestaurantBooking = ({ route }: any) => {
       const selectedTimeSlotObj = allTimeSlots.find(
         (t) => t.id === selectedTimeSlot
       );
-  
+
       if (selectedTimeSlotObj) {
         selectedTimeSlotText = selectedTimeSlotObj.time;
       }
-  
+
       if (!user?._id || !restaurant?._id || !membersCount || !selectedDateObj) {
         Alert.alert(
           "Missing Information",
@@ -207,15 +207,15 @@ const RestaurantBooking = ({ route }: any) => {
         );
         return;
       }
-  
+
       // Format date in the requested format: day-month-year (9-3-25)
       const today = new Date();
       const year = today.getFullYear().toString().slice(-2); // Get last 2 digits of year
       const monthNumber = today.getMonth() + 1; // getMonth() is 0-indexed
-      
+
       // Format date properly (9-3-25 format)
       const formattedDate = `${selectedDateObj.date}-${monthNumber}-${year}`;
-  
+
       // Booking logic with correct data
       const bookingData = {
         userId: user._id,
@@ -224,18 +224,18 @@ const RestaurantBooking = ({ route }: any) => {
         selectedDate: formattedDate, // Now in format "9-3-25"
         selectedTimeSlot: selectedTimeSlotText,
       };
-  
+
       const response = await axios.post(
         API_BASE_URL + "/api/bookings",
         bookingData
       );
-  
+
       Alert.alert("Booking Successful", "Your booking has been confirmed.");
       // navigation.preload("Home");
       navigation.goBack();
     } catch (error) {
       console.error("Booking error:", error);
-  
+
       // Check if it's an axios error with response
       if (axios.isAxiosError(error) && error.response) {
         console.error("Server response:", error.response.data);
@@ -352,24 +352,47 @@ const RestaurantBooking = ({ route }: any) => {
   // Render time slot
   const renderTimeSlot = ({ item }: { item: TimeSlot }) => {
     const isSelected: boolean = selectedTimeSlot === item.id;
-
+    const currentTime = new Date();
+    const selectedDateObj = generateDates().find((d) => d.id === selectedDate);
+    const isToday = selectedDateObj?.isToday;
+    
+    // Convert time string to Date object for comparison
+    const [time, modifier] = item.time.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+    const timeSlotDate = new Date();
+    timeSlotDate.setHours(hours, minutes, 0, 0);
+    
+    const isPastTime = isToday && timeSlotDate < currentTime;
+  
     return (
       <TouchableOpacity
-        style={[styles.timeSlot, isSelected && styles.selectedTimeSlot]}
+        style={[styles.timeSlot, isSelected && styles.selectedTimeSlot, isPastTime && styles.disabledTimeSlot]}
         onPress={() => {
-          setSelectedTimeSlot(item.id);
-          setBookingDetails({
-            ...bookingDetails,
-            selectedTimeSlot: item.time,
-          });
+          if (!isPastTime) {
+            setSelectedTimeSlot(item.id);
+            setBookingDetails({
+              ...bookingDetails,
+              selectedTimeSlot: item.time,
+            });
+          }
         }}
+        disabled={isPastTime}
       >
-        <Text style={styles.timeText}>{item.time}</Text>
+        <Text style={[styles.timeText, isPastTime && styles.disabledText]}>{item.time}</Text>
       </TouchableOpacity>
     );
   };
+  
 
   const styles = StyleSheet.create({
+    disabledTimeSlot: {
+      backgroundColor: "#d3d3d3",
+    },
+    disabledText: {
+      color: "#a9a9a9",
+    },
     loadingContainer: {
       flex: 1,
       justifyContent: "center",
@@ -380,7 +403,6 @@ const RestaurantBooking = ({ route }: any) => {
       backgroundColor: "#fff",
       paddingTop: insets.top,
       // marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  
     },
     header: {
       flexDirection: "row",
@@ -602,9 +624,7 @@ const RestaurantBooking = ({ route }: any) => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() =>
-            navigation.goBack()
-          }
+          onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
           <Text style={styles.headerTitle}>BOOKING</Text>
@@ -761,5 +781,3 @@ const RestaurantBooking = ({ route }: any) => {
 };
 
 export default RestaurantBooking;
-
-

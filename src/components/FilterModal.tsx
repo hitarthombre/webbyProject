@@ -50,11 +50,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const optionsWidth = screenWidth < 375 ? '70%' : '65%';
 
   const filterCategories: FilterCategory[] = [
-    {
-      id: 'sort',
-      title: 'Sort',
-      options: []
-    },
+    // {
+    //   id: 'sort',
+    //   title: 'Sort',
+    //   options: []
+    // },
     // {
     //   id: 'availableToday',
     //   title: 'Available Today',
@@ -75,11 +75,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
       title: 'Ratings',
       options: []
     },
-    {
-      id: 'restaurantCategory',
-      title: 'Restaurant Category',
-      options: []
-    },
+    // {
+    //   id: 'restaurantCategory',
+    //   title: 'Restaurant Category',
+    //   options: []
+    // },
     // {
     //   id: 'dietaryPreferences',
     //   title: 'Dietary Preferences',

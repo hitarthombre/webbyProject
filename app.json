@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "webby",
+    "name": "Webby",
     "slug": "webby",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,7 +13,9 @@
       "backgroundColor": "#ffffff"
     },
     "plugins": [
-      ["@react-native-google-signin/google-signin"]
+      [
+        "@react-native-google-signin/google-signin"
+      ]
     ],
     "ios": {
       "supportsTablet": true

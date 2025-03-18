@@ -117,7 +117,7 @@ const RegisterScreen = ({ navigation }: Props) => {
     // Navigate to UserDetails screen with email and password
     navigation.navigate("UserDetails", {
       email,
-      password
+      password,
     });
 
     setIsInProgress(false);
@@ -149,7 +149,8 @@ const RegisterScreen = ({ navigation }: Props) => {
     <View style={tw`flex-1 justify-center p-4 items-center`}>
       <Image
         source={require("../../../assets/images/auth_icon.png")}
-        style={tw`w-full h-30 mb-8`}
+        style={tw`w-full h-40 mb-8`}
+        resizeMode="contain"
       />
       <Text style={tw`text-3xl mb-8 text-center font-bold`}>SIGNUP</Text>
 
